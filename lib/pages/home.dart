@@ -5,99 +5,55 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/widgets/card_node_stats.dart';
-import 'package:mobile_app/widgets/card_bitcoind_stats.dart';
-import 'package:mobile_app/widgets/card_lnd_stats.dart';
-import '../gql/queries/system_status.dart' as sysStatusQueries;
+import 'package:mobile_app/pages/receive.dart';
+import 'package:mobile_app/pages/send.dart';
+import 'stats.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
+  int _bottomNavbarIndex = 0;
+  Widget _currentPage = StatsPage();
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("Fort Bitcoin"),
       ),
-      body: new Query(
-        sysStatusQueries.getSystemStatus,
-        pollInterval: 15,
-        builder: ({
-          bool loading,
-          Map data,
-          String error,
-        }) {
-          if (error != '') {
-            return new Text(error);
-          }
-
-          if (loading) {
-            return ListView(
-              children: <Widget>[
-                CardNodeStats(loading),
-                CardBitcoindStats(loading, false),
-                CardBitcoindStats(loading, true)
-              ],
-            );
-          } else {
-            var sys = data["systemstatus"];
-
-            return ListView(
-              children: <Widget>[
-                CardNodeStats(
-                    loading,
-                    sys["uptime"],
-                    sys["cpuLoad"],
-                    sys["memoryUsed"],
-                    sys["memoryTotal"],
-                    sys["trafficIn"],
-                    sys["trafficOut"]),
-                CardBitcoindStats(
-                  loading,
-                  false,
-                  data["mainnetblocks"]["blocks"],
-                  data["mainnetnetwork"]["subversion"],
-                  data["mainnetnetwork"]["connections"],
-                  data["mainnetnetwork"]["warnings"],
-                ),
-                CardLndStats(
-                  loading,
-                  false,
-                  data["mainnetln"]["alias"],
-                  data["mainnetln"]["blockHeight"],
-                  data["mainnetln"]["identityPubkey"],
-                  data["mainnetln"]["numActiveChannels"],
-                  data["mainnetln"]["numPeers"],
-                  data["mainnetln"]["syncedToChain"],
-                  data["mainnetln"]["version"],
-                ),
-                CardBitcoindStats(
-                  loading,
-                  true,
-                  data["testnetblocks"]["blocks"],
-                  data["testnetnetwork"]["subversion"],
-                  data["testnetnetwork"]["connections"],
-                  data["testnetnetwork"]["warnings"],
-                ),
-                CardLndStats(
-                  loading,
-                  false,
-                  data["testnetln"]["alias"],
-                  data["testnetln"]["blockHeight"],
-                  data["testnetln"]["identityPubkey"],
-                  data["testnetln"]["numActiveChannels"],
-                  data["testnetln"]["numPeers"],
-                  data["testnetln"]["syncedToChain"],
-                  data["testnetln"]["version"],
-                ),
-              ],
-            );
-          }
+      body: _currentPage,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _bottomNavbarIndex,
+        onTap: (int index) {
+          setState(() {
+            _bottomNavbarIndex = index;
+            switch (index) {
+              case 0:
+                _currentPage = StatsPage();
+                break;
+              case 1:
+                _currentPage = SendPage();
+                break;
+              case 2:
+                _currentPage = ReceivePage();
+                break;
+              default:
+                _currentPage = StatsPage();
+            }
+          });
         },
+        items: [
+          BottomNavigationBarItem(
+              title: const Text("Stats"), icon: const Icon(Icons.home)),
+          BottomNavigationBarItem(
+              title: const Text("Send"), icon: const Icon(Icons.send)),
+          BottomNavigationBarItem(
+              title: const Text("Receive"), icon: const Icon(Icons.get_app))
+        ],
       ),
     );
   }
