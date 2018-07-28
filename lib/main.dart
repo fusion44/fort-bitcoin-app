@@ -9,19 +9,25 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/pages/home.dart';
 
 void main() {
-  client = new Client(
-    endPoint: 'https://4e5dce1f.ngrok.io/gql/',
-    cache: new InMemoryCache(),
+  ValueNotifier<Client> client = ValueNotifier(
+    Client(
+      endPoint: 'https://4e5dce1f.ngrok.io/gql/',
+      cache: InMemoryCache(),
+    ),
   );
-  client.apiToken = '';
 
-  runApp(new FortBitcoinApp());
+  runApp(new FortBitcoinApp(client));
 }
 
 class FortBitcoinApp extends StatelessWidget {
+  ValueNotifier<Client> _client;
+
+  FortBitcoinApp([this._client]);
+
   @override
   Widget build(BuildContext context) {
-    return CacheProvider(
+    return GraphqlProvider(
+      client: _client,
       child: MaterialApp(
         title: 'Fort Bitcoin',
         theme: ThemeData(
