@@ -18,6 +18,8 @@ dependencies:
   cupertino_icons: ^0.1.2
   graphql_flutter: ^0.7.0
   charts_flutter: ^0.3.0
+  qrcode_reader:
+   git: git://github.com/bcko/flutter_qrcode_reader.git
 
 dev_dependencies:
   flutter_test:
