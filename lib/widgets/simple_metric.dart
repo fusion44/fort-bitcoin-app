@@ -15,21 +15,23 @@ class SimpleMetricWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text(
           _header,
-          style: TextStyle(fontSize: 20.0),
+          style: theme.textTheme.subhead,
         ),
         Text(
           _metric,
-          style: TextStyle(
-              fontSize: 25.0, fontWeight: FontWeight.bold, color: Colors.green),
+          style: theme.textTheme.display1,
         ),
         Text(
           _footer,
+          style: theme.textTheme.caption,
         )
       ],
     );

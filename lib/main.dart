@@ -20,7 +20,7 @@ void main() {
 }
 
 class FortBitcoinApp extends StatelessWidget {
-  ValueNotifier<Client> _client;
+  final ValueNotifier<Client> _client;
 
   FortBitcoinApp([this._client]);
 
@@ -30,9 +30,7 @@ class FortBitcoinApp extends StatelessWidget {
       client: _client,
       child: MaterialApp(
         title: 'Fort Bitcoin',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        theme: ThemeData.dark(),
         home: HomePage(),
       ),
     );

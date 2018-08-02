@@ -61,7 +61,7 @@ class _SendPageState extends State<SendPage> {
       case _PageStates.show_decoded:
         _currentPage = Padding(
             padding: EdgeInsets.all(15.0),
-            child: Column(children: <Widget>[
+            child: ListView(children: <Widget>[
               ShowDecodedPay(_payReq),
               IconButton(
                 iconSize: 66.0,
