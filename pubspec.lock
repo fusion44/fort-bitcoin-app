@@ -112,10 +112,12 @@ packages:
   graphql_flutter:
     dependency: "direct main"
     description:
-      name: graphql_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.7.0"
+      path: "."
+      ref: HEAD
+      resolved-ref: b481f36d4ece22bd899a069b73d8df3c78e22e06
+      url: "git://github.com/zino-app/graphql-flutter.git"
+    source: git
+    version: "0.7.1"
   html:
     dependency: transitive
     description:
@@ -275,7 +277,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "8468b3780b841495fc6fce7ccb8e2262dd08bfbd"
+      resolved-ref: f1cc673672cbcff98b024806fb4ce81c9403ce24
       url: "git://github.com/bcko/flutter_qrcode_reader.git"
     source: git
     version: "0.3.2"
@@ -395,7 +397,7 @@ packages:
       name: uuid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   vector_math:
     dependency: transitive
     description:

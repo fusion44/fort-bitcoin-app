@@ -25,10 +25,10 @@ class _StatsPageState extends State<StatsPage> {
       builder: ({
         bool loading,
         Map data,
-        String error,
+        Exception error,
       }) {
-        if (error != '') {
-          return new Text(error);
+        if (error != null) {
+          return new Text(error.toString());
         }
 
         if (loading) {
