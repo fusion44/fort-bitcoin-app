@@ -12,6 +12,9 @@ import 'package:mobile_app/widgets/card_lnd_stats.dart';
 import '../gql/queries/system_status.dart' as sysStatusQueries;
 
 class StatsPage extends StatefulWidget {
+  static final IconData icon = Icons.show_chart;
+  static final String appBarText = "Node Stats";
+
   @override
   _StatsPageState createState() => _StatsPageState();
 }
@@ -19,7 +22,7 @@ class StatsPage extends StatefulWidget {
 class _StatsPageState extends State<StatsPage> {
   @override
   Widget build(BuildContext context) {
-    return new Query(
+    return Query(
       sysStatusQueries.getSystemStatus,
       pollInterval: 15,
       builder: ({
@@ -40,7 +43,8 @@ class _StatsPageState extends State<StatsPage> {
             ],
           );
         } else {
-          var sys = data["systemstatus"];
+          var resp = data["data"];
+          var sys = resp["systemstatus"];
 
           return ListView(
             children: <Widget>[
@@ -55,40 +59,40 @@ class _StatsPageState extends State<StatsPage> {
               CardBitcoindStats(
                 loading,
                 false,
-                data["mainnetblocks"]["blocks"],
-                data["mainnetnetwork"]["subversion"],
-                data["mainnetnetwork"]["connections"],
-                data["mainnetnetwork"]["warnings"],
+                resp["mainnetblocks"]["blocks"],
+                resp["mainnetnetwork"]["subversion"],
+                resp["mainnetnetwork"]["connections"],
+                resp["mainnetnetwork"]["warnings"],
               ),
               CardLndStats(
                 loading,
                 false,
-                data["mainnetln"]["alias"],
-                data["mainnetln"]["blockHeight"],
-                data["mainnetln"]["identityPubkey"],
-                data["mainnetln"]["numActiveChannels"],
-                data["mainnetln"]["numPeers"],
-                data["mainnetln"]["syncedToChain"],
-                data["mainnetln"]["version"],
+                resp["mainnetln"]["alias"],
+                resp["mainnetln"]["blockHeight"],
+                resp["mainnetln"]["identityPubkey"],
+                resp["mainnetln"]["numActiveChannels"],
+                resp["mainnetln"]["numPeers"],
+                resp["mainnetln"]["syncedToChain"],
+                resp["mainnetln"]["version"],
               ),
               CardBitcoindStats(
                 loading,
                 true,
-                data["testnetblocks"]["blocks"],
-                data["testnetnetwork"]["subversion"],
-                data["testnetnetwork"]["connections"],
-                data["testnetnetwork"]["warnings"],
+                resp["testnetblocks"]["blocks"],
+                resp["testnetnetwork"]["subversion"],
+                resp["testnetnetwork"]["connections"],
+                resp["testnetnetwork"]["warnings"],
               ),
               CardLndStats(
                 loading,
                 false,
-                data["testnetln"]["alias"],
-                data["testnetln"]["blockHeight"],
-                data["testnetln"]["identityPubkey"],
-                data["testnetln"]["numActiveChannels"],
-                data["testnetln"]["numPeers"],
-                data["testnetln"]["syncedToChain"],
-                data["testnetln"]["version"],
+                resp["testnetln"]["alias"],
+                resp["testnetln"]["blockHeight"],
+                resp["testnetln"]["identityPubkey"],
+                resp["testnetln"]["numActiveChannels"],
+                resp["testnetln"]["numPeers"],
+                resp["testnetln"]["syncedToChain"],
+                resp["testnetln"]["version"],
               ),
             ],
           );

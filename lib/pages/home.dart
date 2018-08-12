@@ -7,54 +7,47 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import 'package:flutter/material.dart';
 import 'package:mobile_app/pages/receive.dart';
 import 'package:mobile_app/pages/send.dart';
-import 'stats.dart';
+import 'package:mobile_app/pages/stats.dart';
+import 'package:mobile_app/routes.dart';
+import 'package:mobile_app/widgets/drawer.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
-  int _bottomNavbarIndex = 0;
-  Widget _currentPage = StatsPage();
+class _HomePageState extends State<HomePage> {
+  String appBarText = StatsPage.appBarText;
+  Pages _page = Pages.stats;
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Fort Bitcoin"),
+    Widget body;
+    switch (_page) {
+      case Pages.stats:
+        appBarText = StatsPage.appBarText;
+        body = StatsPage();
+        break;
+      case Pages.send:
+        appBarText = SendPage.appBarText;
+        body = SendPage();
+        break;
+      case Pages.receive:
+        appBarText = ReceivePage.appBarText;
+        body = ReceivePage();
+        break;
+      default:
+    }
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(appBarText),
       ),
-      body: _currentPage,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _bottomNavbarIndex,
-        onTap: (int index) {
-          setState(() {
-            _bottomNavbarIndex = index;
-            switch (index) {
-              case 0:
-                _currentPage = StatsPage();
-                break;
-              case 1:
-                _currentPage = SendPage();
-                break;
-              case 2:
-                _currentPage = ReceivePage();
-                break;
-              default:
-                _currentPage = StatsPage();
-            }
-          });
-        },
-        items: [
-          BottomNavigationBarItem(
-              title: const Text("Stats"), icon: const Icon(Icons.home)),
-          BottomNavigationBarItem(
-              title: const Text("Send"), icon: const Icon(Icons.send)),
-          BottomNavigationBarItem(
-              title: const Text("Receive"), icon: const Icon(Icons.get_app))
-        ],
-      ),
+      body: body,
+      drawer: FortBtcDrawer((Pages page) {
+        setState(() {
+          _page = page;
+        });
+      }),
     );
   }
 }

@@ -1,4 +1,8 @@
-import 'dart:async';
+/*
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -10,6 +14,9 @@ import 'package:mobile_app/widgets/show_decoded_pay.dart';
 import 'package:qrcode_reader/QRCodeReader.dart';
 
 class SendPage extends StatefulWidget {
+  static IconData icon = Icons.send;
+  static String appBarText = "Send";
+
   SendPage({Key key, this.title}) : super(key: key);
 
   final String title;

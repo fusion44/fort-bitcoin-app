@@ -7,6 +7,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/pages/home.dart';
+import 'package:mobile_app/routes.dart';
 
 void main() {
   ValueNotifier<Client> client = ValueNotifier(
@@ -16,7 +17,7 @@ void main() {
     ),
   );
 
-  runApp(new FortBitcoinApp(client));
+  runApp(FortBitcoinApp(client));
 }
 
 class FortBitcoinApp extends StatelessWidget {
@@ -32,6 +33,8 @@ class FortBitcoinApp extends StatelessWidget {
         title: 'Fort Bitcoin',
         theme: ThemeData.dark(),
         home: HomePage(),
+        initialRoute: '/home',
+        routes: routes,
       ),
     );
   }
