@@ -6,13 +6,14 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/pages/home.dart';
+import 'package:mobile_app/config.dart';
+import 'package:mobile_app/pages/splash.dart';
 import 'package:mobile_app/routes.dart';
 
 void main() {
   ValueNotifier<Client> client = ValueNotifier(
     Client(
-      endPoint: 'https://4e5dce1f.ngrok.io/gql/',
+      endPoint: '$endPoint/gql/',
       cache: InMemoryCache(),
     ),
   );
@@ -32,8 +33,8 @@ class FortBitcoinApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Fort Bitcoin',
         theme: ThemeData.dark(),
-        home: HomePage(),
-        initialRoute: '/home',
+        home: SplashPage(),
+        initialRoute: '/splash',
         routes: routes,
       ),
     );
