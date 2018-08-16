@@ -21,3 +21,15 @@ class User {
     return User(0, "", "");
   }
 }
+
+/// Represents an error when a query returned with an error
+/// Server returns error codes >= 0
+/// negative error values can be used when the cause is
+/// local (API not reachable etc)
+class DataFetchError {
+  final int code;
+  final String message;
+  final String path;
+
+  DataFetchError(this.code, this.message, this.path);
+}
