@@ -30,18 +30,18 @@ class _StatsPageState extends State<StatsPage> {
   Map<String, dynamic> _data;
   Client _client;
   Map<String, DataFetchError> _errorMessages = Map();
+  StreamSubscription<Map<String, dynamic>> _subscription;
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
     _client = GraphqlProvider.of(context).value;
-    _fetchData().then((data) {
-      _processData(data);
-    }).catchError((error) {
-      // Process client errors like 404's
-      DataFetchError err = DataFetchError(-1, error.toString(), _localErrorKey);
-      _errorMessages[_localErrorKey] = err;
-      print(error);
-    });
+    _fetchData();
     super.didChangeDependencies();
   }
 
@@ -78,9 +78,22 @@ class _StatsPageState extends State<StatsPage> {
     }
   }
 
-  Future<Map<String, dynamic>> _fetchData() {
+  void _fetchData() {
+    // cancel possible old subscription
+    _subscription?.cancel();
+    //reset old error messages
     _errorMessages = Map();
-    return _client.query(query: sysStatusQueries.getSystemStatus);
+    var query = _client.query(query: sysStatusQueries.getSystemStatus);
+    try {
+      _subscription = query.asStream().listen((data) {
+        _processData(data);
+      });
+    } catch (error) {
+      // Process client errors like 404's
+      DataFetchError err = DataFetchError(-1, error.toString(), _localErrorKey);
+      _errorMessages[_localErrorKey] = err;
+      print(error);
+    }
   }
 
   bool hasError(List<String> keys) {
@@ -112,14 +125,7 @@ class _StatsPageState extends State<StatsPage> {
 
       return RefreshIndicator(
           onRefresh: () async {
-            try {
-              var data = await _fetchData();
-              _processData(data);
-              return null;
-            } catch (error) {
-              print(error);
-              return null;
-            }
+            _fetchData();
           },
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
