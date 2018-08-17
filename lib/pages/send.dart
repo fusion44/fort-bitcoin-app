@@ -4,11 +4,14 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/gql/queries/payments.dart';
 import 'package:mobile_app/gql/types/lnpayreq.dart';
 import 'package:mobile_app/gql/types/lnsendpayresult.dart';
+import 'package:mobile_app/models.dart';
 import 'package:mobile_app/widgets/scale_in_animated_icon.dart';
 import 'package:mobile_app/widgets/show_decoded_pay.dart';
 import 'package:qrcode_reader/QRCodeReader.dart';
@@ -33,8 +36,9 @@ enum _PageStates {
   decoding,
   show_decoded,
   sending,
+  show_error, // local errors (node not reachable etc.)
   show_result,
-  show_result_error
+  show_result_error // errors during payment from server
 }
 
 class _SendPageState extends State<SendPage> {
@@ -44,6 +48,7 @@ class _SendPageState extends State<SendPage> {
   LnPayReq _payReq;
   String _payReqEncoded;
   LnSendPaymentResult _result;
+  String _errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +98,20 @@ class _SendPageState extends State<SendPage> {
           ),
           CircularProgressIndicator()
         ]);
+        break;
+      case _PageStates.show_error:
+        _currentPage = Column(
+          children: <Widget>[
+            ScaleInAnimatedIcon(
+              Icons.error_outline,
+              color: Colors.redAccent,
+            ),
+            Text(
+              _errorText,
+              style: TextStyle(color: Colors.red, fontSize: 25.0),
+            )
+          ],
+        );
         break;
       case _PageStates.show_result:
         _currentPage = Column(children: <Widget>[
@@ -156,9 +175,15 @@ class _SendPageState extends State<SendPage> {
         variables: {"testnet": true, "payReq": req}).then((data) {
       setState(() {
         _currentState = _PageStates.show_decoded;
-        _payReq = LnPayReq(data["lnDecodePayReq"]);
+        _payReq = LnPayReq(data["data"]["lnDecodePayReq"]);
         _payReqEncoded = req;
       });
+    }).catchError((error) {
+      setState(() {
+        _currentState = _PageStates.show_error;
+        _errorText = error.toString();
+      });
+      print(error);
     });
   }
 
@@ -170,16 +195,45 @@ class _SendPageState extends State<SendPage> {
     _client.query(
         query: sendPaymentForRequest,
         variables: {"testnet": true, "paymentRequest": req}).then((data) {
-      LnSendPaymentResult res = LnSendPaymentResult(data["lnSendPayment"]);
-      if (res.hasError) {
-        setState(() {
-          _currentState = _PageStates.show_result_error;
-          _result = res;
-        });
+      if (!data.containsKey("errors")) {
+        LnSendPaymentResult res =
+            LnSendPaymentResult(data["data"]["lnSendPayment"]);
+        if (res.hasError) {
+          // process payment errors
+          setState(() {
+            _currentState = _PageStates.show_result_error;
+            _result = res;
+          });
+        } else {
+          setState(() {
+            _currentState = _PageStates.show_result;
+            _result = res;
+          });
+        }
       } else {
+        Map<String, DataFetchError> errors = Map();
+
+        if (data.containsKey("errors")) {
+          for (var error in data["errors"]) {
+            int code;
+            String message;
+            jsonDecode(error["message"], reviver: (k, v) {
+              if (k == "code") {
+                code = v;
+              } else if (k == "message") {
+                message = v;
+              }
+            });
+            DataFetchError err =
+                DataFetchError(code, message, error["path"][0]);
+            errors[err.path] = err;
+          }
+        }
+
         setState(() {
-          _currentState = _PageStates.show_result;
-          _result = res;
+          // process erros due to node failures
+          _currentState = _PageStates.show_error;
+          _errorText = "";
         });
       }
     }).catchError((error) {
