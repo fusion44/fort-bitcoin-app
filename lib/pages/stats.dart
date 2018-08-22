@@ -30,13 +30,6 @@ class _StatsPageState extends State<StatsPage> {
   Map<String, dynamic> _data;
   Client _client;
   Map<String, DataFetchError> _errorMessages = Map();
-  StreamSubscription<Map<String, dynamic>> _subscription;
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
-  }
 
   @override
   void didChangeDependencies() {
@@ -78,16 +71,12 @@ class _StatsPageState extends State<StatsPage> {
     }
   }
 
-  void _fetchData() {
-    // cancel possible old subscription
-    _subscription?.cancel();
+  Future _fetchData() async {
     //reset old error messages
     _errorMessages = Map();
-    var query = _client.query(query: sysStatusQueries.getSystemStatus);
     try {
-      _subscription = query.asStream().listen((data) {
-        _processData(data);
-      });
+      var data = await _client.query(query: sysStatusQueries.getSystemStatus);
+      _processData(data);
     } catch (error) {
       // Process client errors like 404's
       DataFetchError err = DataFetchError(-1, error.toString(), _localErrorKey);
@@ -125,7 +114,7 @@ class _StatsPageState extends State<StatsPage> {
 
       return RefreshIndicator(
           onRefresh: () async {
-            _fetchData();
+            await _fetchData();
           },
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
