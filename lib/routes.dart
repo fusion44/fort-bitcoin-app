@@ -11,7 +11,7 @@ import 'package:mobile_app/pages/splash.dart';
 
 // Pages that have no route. They all reside in /home
 // and are switched via drawer
-enum Pages { stats, send, receive }
+enum Pages { balance, stats, send, receive }
 
 final routes = {
   "/home": (BuildContext context) => new HomePage(),

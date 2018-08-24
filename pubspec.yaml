@@ -24,6 +24,7 @@ dependencies:
    git: git://github.com/bcko/flutter_qrcode_reader.git
   html: any
   shared_preferences: 0.4.2
+  date_format: ^1.0.5
   
 dev_dependencies:
   flutter_test:

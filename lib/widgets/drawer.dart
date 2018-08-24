@@ -5,6 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
+import 'package:mobile_app/pages/balance.dart';
 import 'package:mobile_app/pages/receive.dart';
 import 'package:mobile_app/pages/send.dart';
 import 'package:mobile_app/pages/stats.dart';
@@ -69,6 +70,13 @@ class FortBtcDrawerState extends State<FortBtcDrawer> {
             title: Text("Receive"),
             onTap: () {
               widget._pageChange(Pages.receive);
+              Navigator.pop(context);
+            }),
+        ListTile(
+            leading: Icon(BalancesPage.icon),
+            title: Text("Balance"),
+            onTap: () {
+              widget._pageChange(Pages.balance);
               Navigator.pop(context);
             })
       ]);

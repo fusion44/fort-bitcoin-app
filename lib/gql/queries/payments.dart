@@ -4,6 +4,18 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+String listPayments = """
+query listPayments(\$testnet: Boolean) {
+  lnListPayments(testnet: \$testnet) {
+    payments {
+      value
+      creationDate
+      fee
+    }
+  }
+}
+""";
+
 String decodePayRequest =
     """query decodePayRequest(\$testnet: Boolean, \$payReq: String!) {
   lnDecodePayReq(testnet: \$testnet, payReq: \$payReq) {

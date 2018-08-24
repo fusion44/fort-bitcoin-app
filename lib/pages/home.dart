@@ -5,6 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
+import 'package:mobile_app/pages/balance.dart';
 import 'package:mobile_app/pages/receive.dart';
 import 'package:mobile_app/pages/send.dart';
 import 'package:mobile_app/pages/stats.dart';
@@ -18,7 +19,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String appBarText = StatsPage.appBarText;
-  Pages _page = Pages.stats;
+  Pages _page = Pages.balance;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +36,10 @@ class _HomePageState extends State<HomePage> {
       case Pages.receive:
         appBarText = ReceivePage.appBarText;
         body = ReceivePage();
+        break;
+      case Pages.balance:
+        appBarText = BalancesPage.appBarText;
+        body = BalancesPage();
         break;
       default:
     }
