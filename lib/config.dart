@@ -5,5 +5,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 // Example during development using ngrok:
-// "https://123456.ngrok.io"
+// "http://192.168.0.42"
 final String endPoint = "";
+
+// Subscriptions endpoint
+// "ws://192.168.0.42/subscriptions"
+final String endPointWS = "";

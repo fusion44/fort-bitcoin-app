@@ -4,6 +4,34 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+String addInvoice = """
+mutation addInvoice(\$value: Int!, \$testnet: Boolean, \$memo: String) {
+  lnAddInvoice(value: \$value, testnet: \$testnet, memo: \$memo){
+    response{
+      rHash
+      paymentRequest
+      addIndex
+    }
+  }
+}
+""";
+
+String invoiceSubscription = """
+subscription InvoicesSubscription(\$testnet:Boolean) {
+  invoiceSubscription(testnet: \$testnet){
+    memo
+    receipt
+    rPreimage
+    rHash
+    value
+    settled
+    creationDate
+    settleDate
+    paymentRequest
+  }
+}
+""";
+
 String listPayments = """
 query listPayments(\$testnet: Boolean) {
   lnListPayments(testnet: \$testnet) {
