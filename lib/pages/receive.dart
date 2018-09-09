@@ -84,77 +84,74 @@ class _ReceivePageState extends State<ReceivePage> {
 
     switch (_currentState) {
       case _PageStates.initial:
-        _currentPage = Scaffold(
-          resizeToAvoidBottomPadding: false,
-          body: Form(
-            key: _formKey,
-            child: Padding(
-              padding: EdgeInsets.all(40.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    "Add Invoice",
-                    style: theme.textTheme.display3,
-                  ),
-                  TextFormField(
-                      autofocus: true,
-                      controller: _valueController,
-                      decoration:
-                          InputDecoration(labelText: 'Invoice value in sats'),
-                      keyboardType: TextInputType.numberWithOptions(
-                          decimal: false, signed: false),
-                      validator: (value) {
-                        int sats = int.tryParse(value);
+        _currentPage = Form(
+          key: _formKey,
+          child: Padding(
+            padding: EdgeInsets.all(40.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "Add Invoice",
+                  style: theme.textTheme.display3,
+                ),
+                TextFormField(
+                    autofocus: true,
+                    controller: _valueController,
+                    decoration:
+                        InputDecoration(labelText: 'Invoice value in sats'),
+                    keyboardType: TextInputType.numberWithOptions(
+                        decimal: false, signed: false),
+                    validator: (value) {
+                      int sats = int.tryParse(value);
 
-                        if (sats == null || sats <= 0) {
-                          return "Must be more than 0";
-                        }
-                      }),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Optional memo'),
-                    controller: _memoController,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: RaisedButton(
-                      onPressed: () {
-                        if (_formKey.currentState.validate()) {
-                          var v = {
-                            "value": int.tryParse(_valueController.value.text),
-                            "memo": _memoController.value.text,
-                            "testnet": true
-                          };
+                      if (sats == null || sats <= 0) {
+                        return "Must be more than 0";
+                      }
+                    }),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Optional memo'),
+                  controller: _memoController,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: RaisedButton(
+                    onPressed: () {
+                      if (_formKey.currentState.validate()) {
+                        var v = {
+                          "value": int.tryParse(_valueController.value.text),
+                          "memo": _memoController.value.text,
+                          "testnet": true
+                        };
 
-                          _client
-                              .query(QueryOptions(
-                                  document: addInvoice, variables: v))
-                              .then((data) {
-                            LnAddInvoiceResponse resp = LnAddInvoiceResponse(
-                                data.data["lnAddInvoice"]["response"]);
-                            print(resp.paymentRequest);
-                            setState(() {
-                              _invoice = resp;
-                              _currentState = _PageStates.awaiting_settlement;
-                            });
-                          }).catchError((error) {
-                            print(error);
-                            setState(() {
-                              _errorText = error.toString();
-                              _currentState = _PageStates.show_error;
-                            });
-                          });
-
+                        _client
+                            .query(QueryOptions(
+                                document: addInvoice, variables: v))
+                            .then((data) {
+                          LnAddInvoiceResponse resp = LnAddInvoiceResponse(
+                              data.data["lnAddInvoice"]["response"]);
+                          print(resp.paymentRequest);
                           setState(() {
-                            _currentState = _PageStates.awaiting_new_invoice;
+                            _invoice = resp;
+                            _currentState = _PageStates.awaiting_settlement;
                           });
-                        }
-                      },
-                      child: Text('Create Invoice'),
-                    ),
+                        }).catchError((error) {
+                          print(error);
+                          setState(() {
+                            _errorText = error.toString();
+                            _currentState = _PageStates.show_error;
+                          });
+                        });
+
+                        setState(() {
+                          _currentState = _PageStates.awaiting_new_invoice;
+                        });
+                      }
+                    },
+                    child: Text('Create Invoice'),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
