@@ -31,7 +31,7 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
   bool _loading = true;
   LnWalletBalance _balanceData;
   List<LnTransaction> _txData = [];
-  Client _client;
+  GraphQLClient _client;
   Map<String, DataFetchError> _errorMessages = Map();
   String _header;
 
@@ -51,7 +51,7 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
   @override
   void didChangeDependencies() {
     if (_client == null) {
-      _client = GraphqlProvider.of(context).value;
+      _client = GraphQLProvider.of(context).value;
 
       // initial fetch
       _fetchData();
@@ -68,14 +68,13 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
     _errorMessages.clear();
     try {
       var v = {"testnet": widget._testnet};
-      var responses = await _client.query(
-          query: combi_queries.getOnchainFinanceInfo, variables: v);
+      QueryResult responses = await _client.query(QueryOptions(
+          document: combi_queries.getOnchainFinanceInfo, variables: v));
 
       if (this.mounted) {
         // preprocess transactions data
         _txData.clear();
-        List transactions =
-            responses["data"]["lnGetTransactions"]["transactions"];
+        List transactions = responses.data["lnGetTransactions"]["transactions"];
         for (var tx in transactions) {
           _txData.add(LnTransaction(tx));
         }
@@ -87,8 +86,7 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
         setState(() {
           _errorMessages = processGraphqlErrors(responses);
           _loading = false;
-          _balanceData =
-              LnWalletBalance(responses["data"]["lnGetWalletBalance"]);
+          _balanceData = LnWalletBalance(responses.data["lnGetWalletBalance"]);
           _txData = _txData;
         });
       }

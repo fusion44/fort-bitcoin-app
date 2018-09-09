@@ -28,12 +28,12 @@ class _StatsPageState extends State<StatsPage> {
   final String _localErrorKey = "local_error";
   bool _loading = true;
   Map<String, dynamic> _data;
-  Client _client;
+  GraphQLClient _client;
   Map<String, DataFetchError> _errorMessages = Map();
 
   @override
   void didChangeDependencies() {
-    _client = GraphqlProvider.of(context).value;
+    _client = GraphQLProvider.of(context).value;
     _fetchData();
     super.didChangeDependencies();
   }
@@ -75,8 +75,10 @@ class _StatsPageState extends State<StatsPage> {
     //reset old error messages
     _errorMessages = Map();
     try {
-      var data = await _client.query(query: sysStatusQueries.getSystemStatus);
-      _processData(data);
+      QueryResult result = await _client.query(QueryOptions(
+          document: sysStatusQueries.getSystemStatus,
+          fetchPolicy: FetchPolicy.networkOnly));
+      _processData(result.data);
     } catch (error) {
       // Process client errors like 404's
       DataFetchError err = DataFetchError(-1, error.toString(), _localErrorKey);
@@ -109,9 +111,6 @@ class _StatsPageState extends State<StatsPage> {
         ],
       );
     } else {
-      var resp = _data["data"];
-      var sys = resp["systemstatus"];
-
       return RefreshIndicator(
           onRefresh: () async {
             await _fetchData();
@@ -124,22 +123,22 @@ class _StatsPageState extends State<StatsPage> {
                       "System Health", _errorMessages["systemstatus"])
                   : CardNodeStats(
                       _loading,
-                      sys["uptime"],
-                      sys["cpuLoad"],
-                      sys["memoryUsed"],
-                      sys["memoryTotal"],
-                      sys["trafficIn"],
-                      sys["trafficOut"]),
+                      _data["systemstatus"]["uptime"],
+                      _data["systemstatus"]["cpuLoad"],
+                      _data["systemstatus"]["memoryUsed"],
+                      _data["systemstatus"]["memoryTotal"],
+                      _data["systemstatus"]["trafficIn"],
+                      _data["systemstatus"]["trafficOut"]),
               hasError(["mainnetblocks", "mainnetnetwork"])
                   ? ErrorDisplayCard(
                       "Bitcoind Mainnet", _errorMessages["systemstatus"])
                   : CardBitcoindStats(
                       _loading,
                       false,
-                      resp["mainnetblocks"]["blocks"],
-                      resp["mainnetnetwork"]["subversion"],
-                      resp["mainnetnetwork"]["connections"],
-                      resp["mainnetnetwork"]["warnings"],
+                      _data["mainnetblocks"]["blocks"],
+                      _data["mainnetnetwork"]["subversion"],
+                      _data["mainnetnetwork"]["connections"],
+                      _data["mainnetnetwork"]["warnings"],
                     ),
               hasError(["mainnetln"])
                   ? ErrorDisplayCard(
@@ -147,13 +146,13 @@ class _StatsPageState extends State<StatsPage> {
                   : CardLndStats(
                       _loading,
                       false,
-                      resp["mainnetln"]["alias"],
-                      resp["mainnetln"]["blockHeight"],
-                      resp["mainnetln"]["identityPubkey"],
-                      resp["mainnetln"]["numActiveChannels"],
-                      resp["mainnetln"]["numPeers"],
-                      resp["mainnetln"]["syncedToChain"],
-                      resp["mainnetln"]["version"],
+                      _data["mainnetln"]["alias"],
+                      _data["mainnetln"]["blockHeight"],
+                      _data["mainnetln"]["identityPubkey"],
+                      _data["mainnetln"]["numActiveChannels"],
+                      _data["mainnetln"]["numPeers"],
+                      _data["mainnetln"]["syncedToChain"],
+                      _data["mainnetln"]["version"],
                     ),
               hasError(["testnetblocks", "testnetnetwork"])
                   ? ErrorDisplayCard(
@@ -161,10 +160,10 @@ class _StatsPageState extends State<StatsPage> {
                   : CardBitcoindStats(
                       _loading,
                       true,
-                      resp["testnetblocks"]["blocks"],
-                      resp["testnetnetwork"]["subversion"],
-                      resp["testnetnetwork"]["connections"],
-                      resp["testnetnetwork"]["warnings"],
+                      _data["testnetblocks"]["blocks"],
+                      _data["testnetnetwork"]["subversion"],
+                      _data["testnetnetwork"]["connections"],
+                      _data["testnetnetwork"]["warnings"],
                     ),
               hasError(["testnetln"])
                   ? ErrorDisplayCard(
@@ -172,13 +171,13 @@ class _StatsPageState extends State<StatsPage> {
                   : CardLndStats(
                       _loading,
                       true,
-                      resp["testnetln"]["alias"],
-                      resp["testnetln"]["blockHeight"],
-                      resp["testnetln"]["identityPubkey"],
-                      resp["testnetln"]["numActiveChannels"],
-                      resp["testnetln"]["numPeers"],
-                      resp["testnetln"]["syncedToChain"],
-                      resp["testnetln"]["version"],
+                      _data["testnetln"]["alias"],
+                      _data["testnetln"]["blockHeight"],
+                      _data["testnetln"]["identityPubkey"],
+                      _data["testnetln"]["numActiveChannels"],
+                      _data["testnetln"]["numPeers"],
+                      _data["testnetln"]["syncedToChain"],
+                      _data["testnetln"]["version"],
                     ),
             ],
           ));

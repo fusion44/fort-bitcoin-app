@@ -6,37 +6,81 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/config.dart';
+import 'package:mobile_app/pages/home.dart';
+import 'package:mobile_app/pages/login.dart';
 import 'package:mobile_app/pages/splash.dart';
 import 'package:mobile_app/routes.dart';
 
-void main() {
-  ValueNotifier<Client> client = ValueNotifier(
-    Client(
-      endPoint: '$endPoint/gql/',
-      cache: InMemoryCache(),
-    ),
-  );
+void main() async {
+  AuthHelper().init();
 
-  runApp(FortBitcoinApp(client));
+  runApp(FortBitcoinApp());
 }
 
 class FortBitcoinApp extends StatelessWidget {
-  final ValueNotifier<Client> _client;
-
-  FortBitcoinApp([this._client]);
-
   @override
   Widget build(BuildContext context) {
-    return GraphqlProvider(
-      client: _client,
-      child: MaterialApp(
-        title: 'Fort Bitcoin',
-        theme: ThemeData.dark(),
-        home: SplashPage(),
-        initialRoute: '/splash',
-        routes: routes,
-      ),
+    StreamBuilder<AuthState> builder = StreamBuilder(
+      initialData: AuthState.loggingIn,
+      stream: AuthHelper().eventStream,
+      builder: (context, asyncSnapshot) {
+        if (asyncSnapshot.hasError) {
+          return new Center(child: Text("error"));
+        }
+        if (asyncSnapshot.hasData) {
+          switch (asyncSnapshot.data) {
+            case AuthState.loggingIn:
+              return MaterialApp(
+                title: 'Fort Bitcoin',
+                theme: ThemeData.dark(),
+                home: SplashPage(),
+              );
+            case AuthState.loggedIn:
+              return _buildGraphQLProvider();
+            case AuthState.loggedOut:
+            case AuthState.loggingOut:
+            case AuthState.loginError:
+              return MaterialApp(
+                title: "Fort Bitcoin",
+                theme: ThemeData.dark(),
+                home: LoginPage(),
+              );
+            default:
+              return Center(child: Text("Implement me ${asyncSnapshot.data}"));
+          }
+        }
+      },
     );
+
+    return MaterialApp(title: 'Fort Bitcoin', home: builder);
   }
+}
+
+GraphQLProvider _buildGraphQLProvider() {
+  HttpLink link = HttpLink(
+    uri: '$endPoint/gql/',
+    headers: <String, String>{
+      'Authorization': 'JWT ${AuthHelper().user.token}',
+    },
+  );
+
+  ValueNotifier<GraphQLClient> client = ValueNotifier(
+    GraphQLClient(
+      cache: InMemoryCache(),
+      link: link,
+    ),
+  );
+
+  return GraphQLProvider(
+    client: client,
+    child: MaterialApp(
+      title: 'Fort Bitcoin',
+      theme: ThemeData.dark(),
+      home: HomePage(),
+      initialRoute: '/home',
+      routes: routes,
+    ),
+  );
 }

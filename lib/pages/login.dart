@@ -64,8 +64,6 @@ class _LoginPageState extends State<LoginPage> {
                               _passwordController.value.text)
                           .then((authState) {
                         if (authState == AuthState.loggedIn) {
-                          Client client = GraphqlProvider.of(context).value;
-                          client.apiToken = AuthHelper().user.token;
                           Navigator.pushNamedAndRemoveUntil(
                               context, "/home", (_) => false);
                         }

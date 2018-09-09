@@ -35,8 +35,8 @@ class AuthHelper {
   String _lastError;
   String get lastError => _lastError;
 
-  StreamController _streamController = StreamController.broadcast();
-  Stream get eventStream => _streamController.stream;
+  StreamController<AuthState> _streamController = StreamController.broadcast();
+  Stream<AuthState> get eventStream => _streamController.stream;
 
   bool _isInitialized = false;
 

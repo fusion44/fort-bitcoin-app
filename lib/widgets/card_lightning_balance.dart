@@ -31,7 +31,7 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
   bool _loading = true;
   LnChannelBalance _balanceData;
   List<LnPayment> _txData = [];
-  Client _client;
+  GraphQLClient _client;
   Map<String, DataFetchError> _errorMessages = Map();
   String _header;
 
@@ -51,7 +51,7 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
   @override
   void didChangeDependencies() {
     if (_client == null) {
-      _client = GraphqlProvider.of(context).value;
+      _client = GraphQLProvider.of(context).value;
 
       // initial fetch
       _fetchData();
@@ -68,13 +68,13 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
     _errorMessages.clear();
     try {
       var v = {"testnet": widget._testnet};
-      var responses = await _client.query(
-          query: combi_queries.getLightningFinanceInfo, variables: v);
+      QueryResult responses = await _client.query(QueryOptions(
+          document: combi_queries.getLightningFinanceInfo, variables: v));
 
       if (this.mounted) {
         // preprocess payments data
         _txData.clear();
-        List payments = responses["data"]["lnListPayments"]["payments"];
+        List payments = responses.data["lnListPayments"]["payments"];
         for (var tx in payments) {
           _txData.add(LnPayment(tx));
         }
@@ -87,7 +87,7 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
           _errorMessages = processGraphqlErrors(responses);
           _loading = false;
           _balanceData =
-              LnChannelBalance(responses["data"]["lnGetChannelBalance"]);
+              LnChannelBalance(responses.data["lnGetChannelBalance"]);
           _txData = _txData;
         });
       }

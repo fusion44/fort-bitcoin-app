@@ -44,7 +44,7 @@ class _ReceivePageState extends State<ReceivePage> {
 
   _PageStates _currentState = _PageStates.initial;
   Widget _currentPage;
-  Client _client;
+  GraphQLClient _client;
   LnAddInvoiceResponse _invoice;
   LnInvoice _settledInvoice;
   SocketClient _socketClient;
@@ -80,7 +80,7 @@ class _ReceivePageState extends State<ReceivePage> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    _client = GraphqlProvider.of(context).value;
+    _client = GraphQLProvider.of(context).value;
 
     switch (_currentState) {
       case _PageStates.initial:
@@ -127,10 +127,11 @@ class _ReceivePageState extends State<ReceivePage> {
                           };
 
                           _client
-                              .query(query: addInvoice, variables: v)
+                              .query(QueryOptions(
+                                  document: addInvoice, variables: v))
                               .then((data) {
                             LnAddInvoiceResponse resp = LnAddInvoiceResponse(
-                                data["data"]["lnAddInvoice"]["response"]);
+                                data.data["lnAddInvoice"]["response"]);
                             print(resp.paymentRequest);
                             setState(() {
                               _invoice = resp;

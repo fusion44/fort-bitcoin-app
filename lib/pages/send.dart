@@ -44,7 +44,7 @@ enum _PageStates {
 class _SendPageState extends State<SendPage> {
   _PageStates _currentState = _PageStates.initial;
   Widget _currentPage;
-  Client _client;
+  GraphQLClient _client;
   LnPayReq _payReq;
   String _payReqEncoded;
   LnSendPaymentResult _result;
@@ -52,7 +52,7 @@ class _SendPageState extends State<SendPage> {
 
   @override
   Widget build(BuildContext context) {
-    _client = GraphqlProvider.of(context).value;
+    _client = GraphQLProvider.of(context).value;
 
     switch (_currentState) {
       case _PageStates.initial:
@@ -170,12 +170,14 @@ class _SendPageState extends State<SendPage> {
     if (payRequest.contains(":")) {
       req = payRequest.split(":")[1];
     }
-    _client.query(
-        query: decodePayRequest,
-        variables: {"testnet": true, "payReq": req}).then((data) {
+    _client
+        .query(QueryOptions(
+            document: decodePayRequest,
+            variables: {"testnet": true, "payReq": req}))
+        .then((data) {
       setState(() {
         _currentState = _PageStates.show_decoded;
-        _payReq = LnPayReq(data["data"]["lnDecodePayReq"]);
+        _payReq = LnPayReq(data.data["lnDecodePayReq"]);
         _payReqEncoded = req;
       });
     }).catchError((error) {
@@ -192,12 +194,14 @@ class _SendPageState extends State<SendPage> {
     if (payRequest.contains(":")) {
       req = payRequest.split(":")[1];
     }
-    _client.query(
-        query: sendPaymentForRequest,
-        variables: {"testnet": true, "paymentRequest": req}).then((data) {
-      if (!data.containsKey("errors")) {
+    _client
+        .query(QueryOptions(
+            document: sendPaymentForRequest,
+            variables: {"testnet": true, "paymentRequest": req}))
+        .then((data) {
+      if (data.errors == null) {
         LnSendPaymentResult res =
-            LnSendPaymentResult(data["data"]["lnSendPayment"]);
+            LnSendPaymentResult(data.data["lnSendPayment"]);
         if (res.hasError) {
           // process payment errors
           setState(() {
@@ -213,21 +217,18 @@ class _SendPageState extends State<SendPage> {
       } else {
         Map<String, DataFetchError> errors = Map();
 
-        if (data.containsKey("errors")) {
-          for (var error in data["errors"]) {
-            int code;
-            String message;
-            jsonDecode(error["message"], reviver: (k, v) {
-              if (k == "code") {
-                code = v;
-              } else if (k == "message") {
-                message = v;
-              }
-            });
-            DataFetchError err =
-                DataFetchError(code, message, error["path"][0]);
-            errors[err.path] = err;
-          }
+        for (var error in data.errors) {
+          int code;
+          String message;
+          jsonDecode(error.message, reviver: (k, v) {
+            if (k == "code") {
+              code = v;
+            } else if (k == "message") {
+              message = v;
+            }
+          });
+          DataFetchError err = DataFetchError(code, message, error.path[0]);
+          errors[err.path] = err;
         }
 
         setState(() {
