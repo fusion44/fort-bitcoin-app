@@ -7,6 +7,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/authhelper.dart';
+import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/config.dart';
 import 'package:mobile_app/pages/home.dart';
 import 'package:mobile_app/pages/login.dart';
@@ -15,6 +16,7 @@ import 'package:mobile_app/routes.dart';
 
 void main() async {
   AuthHelper().init();
+  ConfigurationBloc().init();
 
   runApp(FortBitcoinApp());
 }
