@@ -98,8 +98,8 @@ class _StatsPageState extends State<StatsPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_errorMessages.containsKey(_localErrorKey)) {
-      return new ErrorDisplayCard("Error", _errorMessages[_localErrorKey]);
+    if (_errorMessages.isNotEmpty) {
+      return new ErrorDisplayCard("Error", _errorMessages.values);
     }
 
     if (_loading) {

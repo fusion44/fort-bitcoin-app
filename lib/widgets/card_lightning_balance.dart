@@ -105,8 +105,8 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_loading && _errorMessages.containsKey(_localErrorKey)) {
-      return ErrorDisplayCard(_header, _errorMessages[_localErrorKey]);
+    if (_errorMessages.isNotEmpty) {
+      return ErrorDisplayCard(_header, _errorMessages.values);
     }
 
     String unit = widget._testnet ? "tsats" : "sats";
