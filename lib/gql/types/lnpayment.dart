@@ -18,7 +18,7 @@ class LnPayment {
     value = data["value"] ?? 0;
     creationDate =
         DateTime.fromMillisecondsSinceEpoch(data["creationDate"] * 1000 ?? 0);
-    path = data["path"] ?? [];
+    path = List<String>.from(data["path"] ?? []);
     fee = data["fee"] ?? 0;
     paymentPreimage = data["paymentPreimage"] ?? "";
   }
