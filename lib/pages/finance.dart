@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/pages/balance.dart';
 import 'package:mobile_app/pages/receive.dart';
 import 'package:mobile_app/pages/send.dart';
@@ -49,7 +50,7 @@ class _FinancePageState extends State<FinancePage> {
     Widget body;
     switch (_page) {
       case BottomNavbarPages.balance:
-        body = BalancesPage();
+        body = BalancesPage(ConfigurationBloc().config.testnet);
         break;
       case BottomNavbarPages.send:
         body = SendPage();

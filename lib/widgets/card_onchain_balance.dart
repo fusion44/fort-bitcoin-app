@@ -28,6 +28,9 @@ class CardOnchainBalance extends StatefulWidget {
 
 class CardOnchainBalanceState extends State<CardOnchainBalance> {
   final String _localErrorKey = "local_error";
+  final String _fetchTransactionsErrorkey = "fetch_payments_error";
+  final String _fetchBalanceErrorkey = "fetch_wallet_balance_error";
+
   bool _loading = true;
   LnWalletBalance _balanceData;
   List<LnTransaction> _txData = [];
@@ -67,26 +70,46 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
     //reset old error messages
     _errorMessages.clear();
     try {
-      var v = {"testnet": widget._testnet};
-      QueryResult responses = await _client.query(QueryOptions(
-          document: combi_queries.getOnchainFinanceInfo, variables: v));
+      QueryResult responses = await _client
+          .query(QueryOptions(document: combi_queries.getOnchainFinanceInfo));
 
       if (this.mounted) {
+        Map listTransactions = responses.data["lnGetTransactions"];
+        Map walletBalance = responses.data["lnGetWalletBalance"];
+
         // preprocess transactions data
         _txData.clear();
-        List transactions = responses.data["lnGetTransactions"]["transactions"];
-        for (var tx in transactions) {
-          _txData.add(LnTransaction(tx));
+        if (listTransactions["__typename"] == "GetTransactionsSuccess") {
+          List transactions =
+              listTransactions["lnTransactionDetails"]["transactions"];
+          for (var tx in transactions) {
+            _txData.add(LnTransaction(tx));
+          }
+        } else {
+          var error = DataFetchError(
+              -1, listTransactions["errorMessage"], _fetchTransactionsErrorkey);
+          _errorMessages[_fetchTransactionsErrorkey] = error;
+          print("Error fetching transactions: ${error.message}");
         }
         // Sort all transactions by creation date so the newest
         // transactions is shown first
         _txData.sort(
             (first, second) => second.timeStamp.compareTo(first.timeStamp));
 
+        if (walletBalance["__typename"] == "GetWalletBalanceSuccess") {
+          _balanceData = LnWalletBalance(walletBalance["lnWalletBalance"]);
+        } else {
+          var error = DataFetchError(
+              -1, walletBalance["errorMessage"], _fetchBalanceErrorkey);
+          _errorMessages[_fetchBalanceErrorkey] = error;
+          print("Error fetching wallet balance: ${error.message}");
+        }
+
+        _errorMessages.addAll(processGraphqlErrors(responses));
         setState(() {
-          _errorMessages = processGraphqlErrors(responses);
+          _errorMessages = _errorMessages;
           _loading = false;
-          _balanceData = LnWalletBalance(responses.data["lnGetWalletBalance"]);
+          _balanceData = _balanceData;
           _txData = _txData;
         });
       }

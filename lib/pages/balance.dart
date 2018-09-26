@@ -11,14 +11,15 @@ import 'package:mobile_app/widgets/card_onchain_balance.dart';
 class BalancesPage extends StatelessWidget {
   static IconData icon = Icons.all_inclusive;
   static String appBarText = "Balances";
+  final bool _testnet;
+
+  BalancesPage([this._testnet = false]);
 
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
-      CardLightningBalance(true),
-      CardOnchainBalance(true),
-      CardLightningBalance(false),
-      CardOnchainBalance(false),
+      CardLightningBalance(_testnet),
+      CardOnchainBalance(_testnet),
     ];
 
     return RefreshIndicator(

@@ -5,35 +5,71 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 String getLightningFinanceInfo = """
-query getLightningFinanceInfo(\$testnet: Boolean) {
-  lnListPayments(testnet: \$testnet) {
-    payments {
-      value
-      creationDate
-      fee
+query getLightningFinanceInfo {
+  lnListPayments {
+    __typename
+    ... on ListPaymentsSuccess {
+      lnTransactionDetails {
+        payments {
+          paymentHash
+          value
+          creationDate
+          path
+          fee
+          paymentPreimage
+        }
+      }
+    }
+    ... on ServerError {
+      errorMessage
     }
   }
-  lnGetChannelBalance(testnet: \$testnet){
-    balance
-    pendingOpenBalance
+  lnGetChannelBalance {
+    __typename
+    ... on GetChannelBalanceSuccess {
+      lnChannelBalance {
+        balance
+        pendingOpenBalance
+      }
+    }
+    ... on ServerError {
+      errorMessage
+    }
   }
 }
+
 """;
 
 String getOnchainFinanceInfo = """
-query getOnchainFinanceInfo(\$testnet: Boolean) {
-  lnGetTransactions(testnet: \$testnet) {
-    transactions {
-      amount
-      timeStamp
-      totalFees
-      destAddresses
+query getOnchainFinanceInfo {
+  lnGetTransactions {
+    __typename
+    ... on GetTransactionsSuccess {
+      lnTransactionDetails {
+        transactions {
+          amount
+          timeStamp
+          totalFees
+          destAddresses
+        }
+      }
+    }
+    ... on ServerError {
+      errorMessage
     }
   }
-  lnGetWalletBalance(testnet: \$testnet) {
-    totalBalance
-    confirmedBalance
-    unconfirmedBalance
+  lnGetWalletBalance {
+    __typename
+    ... on GetWalletBalanceSuccess {
+      lnWalletBalance {
+        totalBalance
+        confirmedBalance
+        unconfirmedBalance
+      }
+    }
+    ... on ServerError {
+      errorMessage
+    }
   }
 }
 """;

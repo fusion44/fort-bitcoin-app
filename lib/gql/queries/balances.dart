@@ -6,19 +6,35 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 String lnGetWalletBalance = """
 {
-  lnGetWalletBalance(\$testnet: Boolean) {
-    totalBalance
-    confirmedBalance
-    unconfirmedBalance
+  lnGetWalletBalance {
+    __typename
+    ... on GetWalletBalanceSuccess {
+      lnWalletBalance {
+        totalBalance
+        confirmedBalance
+        unconfirmedBalance
+      }
+    }
+    ... on ServerError {
+      errorMessage
+    }
   }
 }
 """;
 
 String lnGetChannelBalance = """
-query getChannelBalance(\$testnet: Boolean) {
-  lnGetChannelBalance(testnet: \$testnet) {
-    balance
-    pendingOpenBalance
+{
+  lnGetChannelBalance {
+    __typename
+    ... on GetChannelBalanceSuccess {
+      lnChannelBalance {
+        balance
+        pendingOpenBalance
+      }
+    }
+    ... on ServerError {
+      errorMessage
+    }
   }
 }
 """;

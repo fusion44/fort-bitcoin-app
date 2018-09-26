@@ -28,6 +28,8 @@ class CardLightningBalance extends StatefulWidget {
 
 class CardLightningBalanceState extends State<CardLightningBalance> {
   final String _localErrorKey = "local_error";
+  final String _fetchPaymentsErrorkey = "fetch_payments_error";
+  final String _fetchBalanceErrorkey = "fetch_chan_balance_error";
   bool _loading = true;
   LnChannelBalance _balanceData;
   List<LnPayment> _txData = [];
@@ -67,27 +69,45 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
     //reset old error messages
     _errorMessages.clear();
     try {
-      var v = {"testnet": widget._testnet};
-      QueryResult responses = await _client.query(QueryOptions(
-          document: combi_queries.getLightningFinanceInfo, variables: v));
+      QueryResult responses = await _client
+          .query(QueryOptions(document: combi_queries.getLightningFinanceInfo));
 
       if (this.mounted) {
+        Map listPayments = responses.data["lnListPayments"];
+        Map channelBalance = responses.data["lnGetChannelBalance"];
+
         // preprocess payments data
         _txData.clear();
-        List payments = responses.data["lnListPayments"]["payments"];
-        for (var tx in payments) {
-          _txData.add(LnPayment(tx));
+        if (listPayments["__typename"] == "ListPaymentsSuccess") {
+          List payments = listPayments["lnTransactionDetails"]["payments"];
+          for (var tx in payments) {
+            _txData.add(LnPayment(tx));
+          }
+        } else {
+          var error = DataFetchError(
+              -1, listPayments["errorMessage"], _fetchPaymentsErrorkey);
+          _errorMessages[_fetchPaymentsErrorkey] = error;
+          print("Error fetching payments: ${error.message}");
         }
         // Sort all payments by creation date so the newest
         // payment is shown first
         _txData.sort((first, second) =>
             second.creationDate.compareTo(first.creationDate));
 
+        if (channelBalance["__typename"] == "GetChannelBalanceSuccess") {
+          _balanceData = LnChannelBalance(channelBalance["lnChannelBalance"]);
+        } else {
+          var error = DataFetchError(
+              -1, channelBalance["errorMessage"], _fetchBalanceErrorkey);
+          _errorMessages[_fetchBalanceErrorkey] = error;
+          print("Error fetching channel balance: ${error.message}");
+        }
+
+        _errorMessages.addAll(processGraphqlErrors(responses));
         setState(() {
-          _errorMessages = processGraphqlErrors(responses);
+          _errorMessages = _errorMessages;
           _loading = false;
-          _balanceData =
-              LnChannelBalance(responses.data["lnGetChannelBalance"]);
+          _balanceData = _balanceData;
           _txData = _txData;
         });
       }
@@ -118,7 +138,8 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
     if (_txData.length == 0) {
       children.add(Text("No payments yet"));
     } else {
-      for (LnPayment p in _txData.getRange(0, 5)) {
+      int maxRange = _txData.length > 5 ? 5 : _txData.length;
+      for (LnPayment p in _txData.getRange(0, maxRange)) {
         String dt = formatDate(p.creationDate, [M, "-", dd, " ", hh, ":", nn]);
         children.add(Row(
           children: <Widget>[
