@@ -44,51 +44,59 @@ query listPayments(\$testnet: Boolean) {
 }
 """;
 
-String decodePayRequest =
-    """query decodePayRequest(\$testnet: Boolean, \$payReq: String!) {
-  lnDecodePayReq(testnet: \$testnet, payReq: \$payReq) {
-    destination
-    paymentHash
-    numSatoshis
-    timestamp
-    expiry
-    description
-    descriptionHash
-    fallbackAddr
-    cltvExpiry
-    routeHints{
-      hopHints{
-        nodeId
-        chanId
-        feeBaseMsat
-        feeProportionalMillionths
-        cltvExpiryDelta
+String decodePayRequest = """query decodePayReq(\$payReq: String!) {
+  lnDecodePayReq(payReq: \$payReq) {
+    __typename
+    ... on DecodePayReqSuccess {
+      lnTransactionDetails {
+        destination
+        paymentHash
+        numSatoshis
+        timestamp
+        expiry
+        description
+        descriptionHash
+        fallbackAddr
+        cltvExpiry
       }
+    }
+    ... on ServerError{
+      errorMessage
     }
   }
 }
 """;
 
 String sendPaymentForRequest = """
-mutation sendPayment(\$testnet: Boolean, \$paymentRequest: String!) {
-  lnSendPayment(testnet: \$testnet, paymentRequest: \$paymentRequest) {
-    paymentError
-    paymentPreimage
-    paymentRoute{
-      totalTimeLock
-      totalFees
-      totalAmt
-      hops {
-        chanId
-        chanCapacity
-        amtToForward
-        fee
-        expiry
-        amtToForwardMsat
-        feeMsat
+mutation sendPayment(\$payReq: String!) {
+  lnSendPayment(paymentRequest: \$payReq) {
+    paymentResult {
+      __typename
+      ... on SendPaymentSuccess {
+        paymentPreimage
+        paymentRoute {
+          totalTimeLock
+          totalFees
+          totalAmt
+          totalFeesMsat
+          totalAmtMsat
+          hops {
+            chanId
+            chanCapacity
+            amtToForward
+            fee
+            expiry
+            amtToForwardMsat
+            feeMsat
+          }
+        }
       }
-      totalFeesMsat
-      totalAmtMsat
+      ... on SendPaymentError {
+        paymentError
+      }
+      ... on ServerError {
+        errorMessage
+      }
     }
   }
 }

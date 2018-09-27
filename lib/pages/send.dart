@@ -172,14 +172,30 @@ class _SendPageState extends State<SendPage> {
     }
     _client
         .query(QueryOptions(
-            document: decodePayRequest,
-            variables: {"testnet": true, "payReq": req}))
+            document: decodePayRequest, variables: {"payReq": req}))
         .then((data) {
-      setState(() {
-        _currentState = _PageStates.show_decoded;
-        _payReq = LnPayReq(data.data["lnDecodePayReq"]);
-        _payReqEncoded = req;
-      });
+      var lnDecodePayReq = data.data["lnDecodePayReq"];
+      switch (lnDecodePayReq["__typename"]) {
+        case "DecodePayReqSuccess":
+          setState(() {
+            _currentState = _PageStates.show_decoded;
+            _payReq = LnPayReq(lnDecodePayReq["lnTransactionDetails"]);
+            _payReqEncoded = req;
+          });
+          break;
+        case "ServerError":
+          setState(() {
+            _currentState = _PageStates.show_error;
+            _errorText = lnDecodePayReq["errorMessage"];
+          });
+          print("Error decoding invoice ${lnDecodePayReq["errorMessage"]}");
+          break;
+        default:
+          setState(() {
+            _currentState = _PageStates.show_error;
+            _errorText = "Not implemented: ${lnDecodePayReq["__typename"]}";
+          });
+      }
     }).catchError((error) {
       setState(() {
         _currentState = _PageStates.show_error;
@@ -196,12 +212,11 @@ class _SendPageState extends State<SendPage> {
     }
     _client
         .query(QueryOptions(
-            document: sendPaymentForRequest,
-            variables: {"testnet": true, "paymentRequest": req}))
+            document: sendPaymentForRequest, variables: {"payReq": req}))
         .then((data) {
       if (data.errors == null) {
         LnSendPaymentResult res =
-            LnSendPaymentResult(data.data["lnSendPayment"]);
+            LnSendPaymentResult(data.data["lnSendPayment"]["paymentResult"]);
         if (res.hasError) {
           // process payment errors
           setState(() {

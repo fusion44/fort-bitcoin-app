@@ -12,12 +12,22 @@ class LnSendPaymentResult {
   String paymentPreimage = "";
   LnRoute paymentRoute;
   LnSendPaymentResult(Map<String, dynamic> data) {
-    if (data["paymentError"] != "") {
-      paymentError = data["paymentError"];
-      hasError = true;
-      return;
+    switch (data["__typename"]) {
+      case "SendPaymentSuccess":
+        paymentPreimage = data["paymentPreimage"];
+        paymentRoute = LnRoute(data["paymentRoute"]);
+        break;
+      case "SendPaymentError":
+        hasError = true;
+        paymentError = data["paymentError"];
+        break;
+      case "ServerError":
+        hasError = true;
+        paymentError = data["errorMessage"];
+        break;
+      default:
+        hasError = true;
+        paymentError = "Not implemented: ${data["__typename"]}";
     }
-    paymentPreimage = data["paymentPreimage"];
-    paymentRoute = LnRoute(data["paymentRoute"]);
   }
 }
