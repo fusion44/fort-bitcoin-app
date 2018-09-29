@@ -96,6 +96,10 @@ class AuthHelper {
     });
   }
 
+  void logout() {
+    this._reset(AuthState.loggedOut);
+  }
+
   bool isLoggedIn() {
     return _authState == AuthState.loggedIn;
   }

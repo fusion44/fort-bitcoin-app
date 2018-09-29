@@ -5,6 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
+import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/pages/finance.dart';
 import 'package:mobile_app/pages/stats.dart';
 import 'package:mobile_app/routes.dart';
@@ -44,9 +45,13 @@ class FortBtcDrawerState extends State<FortBtcDrawer> {
     ListView list;
 
     if (_showDetails) {
-      list = ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[ListTile(title: Text("Logout"))]);
+      list = ListView(padding: EdgeInsets.zero, children: <Widget>[
+        ListTile(
+            title: Text("Logout"),
+            onTap: () {
+              AuthHelper().logout();
+            })
+      ]);
     } else {
       list = ListView(padding: EdgeInsets.zero, children: <Widget>[
         ListTile(
