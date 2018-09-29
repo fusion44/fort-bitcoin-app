@@ -6,6 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/gql/queries/payments.dart';
 import 'package:mobile_app/gql/types/lninvoice.dart';
 import 'package:mobile_app/gql/types/lninvoiceresponse.dart';
@@ -57,23 +58,49 @@ class _ReceivePageState extends State<ReceivePage> {
   }
 
   void _makeSock() async {
-    _socketClient = await SocketClient.connect(config.endPointWS);
-
-    final dynamic v = {
-      'testnet': true,
-    };
-
+    _socketClient = await SocketClient.connect(config.endPointWS, headers: {
+      'content-type': 'application/json',
+      'Authorization': 'JWT ${AuthHelper().user.token}'
+    });
     _socketClient
-        .subscribe(
-            SubscriptionRequest("InvoicesSubscription", invoiceSubscription, v))
+        .subscribe(SubscriptionRequest(
+            "InvoicesSubscription", invoiceSubscription, {}))
         .listen((data) {
-      var lnAddInvoiceResponse = LnInvoice(data.data["invoiceSubscription"]);
-      if (lnAddInvoiceResponse.paymentRequest == _invoice.paymentRequest) {
-        setState(() {
-          _settledInvoice = lnAddInvoiceResponse;
-          _currentState = _PageStates.settled;
-        });
+      if (_invoice == null) return;
+
+      var sub = data.data["invoiceSubscription"];
+      if (sub == null) return;
+
+      String typename = sub["__typename"];
+      switch (typename) {
+        case "InvoiceSubSuccess":
+          var lnAddInvoiceResponse = LnInvoice(sub["invoice"]);
+          if (lnAddInvoiceResponse.paymentRequest == _invoice.paymentRequest &&
+              lnAddInvoiceResponse.settled) {
+            setState(() {
+              _settledInvoice = lnAddInvoiceResponse;
+              _currentState = _PageStates.settled;
+            });
+          }
+          break;
+        case "ServerError":
+          print(data.data["invoiceSubscription"]["errorMessage"]);
+          break;
+        case "InvoiceSubError":
+          break;
+        default:
       }
+    });
+  }
+
+  _reset() {
+    this._valueController.clear();
+    this._memoController.clear();
+    setState(() {
+      this._currentState = _PageStates.initial;
+      this._invoice = null;
+      this._settledInvoice = null;
+      this._errorText = "";
     });
   }
 
@@ -121,20 +148,45 @@ class _ReceivePageState extends State<ReceivePage> {
                         var v = {
                           "value": int.tryParse(_valueController.value.text),
                           "memo": _memoController.value.text,
-                          "testnet": true
                         };
 
                         _client
                             .query(QueryOptions(
                                 document: addInvoice, variables: v))
                             .then((data) {
-                          LnAddInvoiceResponse resp = LnAddInvoiceResponse(
-                              data.data["lnAddInvoice"]["response"]);
-                          print(resp.paymentRequest);
-                          setState(() {
-                            _invoice = resp;
-                            _currentState = _PageStates.awaiting_settlement;
-                          });
+                          String typename =
+                              data.data["lnAddInvoice"]["result"]["__typename"];
+                          switch (typename) {
+                            case "AddInvoiceSuccess":
+                              LnAddInvoiceResponse resp = LnAddInvoiceResponse(
+                                  data.data["lnAddInvoice"]["result"]
+                                      ["invoice"]);
+                              print(resp.paymentRequest);
+                              setState(() {
+                                _invoice = resp;
+                                _currentState = _PageStates.awaiting_settlement;
+                              });
+                              break;
+                            case "AddInvoiceError":
+                              setState(() {
+                                _errorText = data.data["lnAddInvoice"]["result"]
+                                    ["paymentError"];
+                                _currentState = _PageStates.show_error;
+                              });
+                              break;
+                            case "ServerError":
+                              setState(() {
+                                _errorText = data.data["lnAddInvoice"]["result"]
+                                    ["errorMessage"];
+                                _currentState = _PageStates.show_error;
+                              });
+                              break;
+                            default:
+                              setState(() {
+                                _errorText = "Not implemented: $typename";
+                                _currentState = _PageStates.show_error;
+                              });
+                          }
                         }).catchError((error) {
                           print(error);
                           setState(() {
@@ -192,7 +244,13 @@ class _ReceivePageState extends State<ReceivePage> {
                       "Received", _settledInvoice.value.toString(), "tsats"),
                   SimpleMetricWidget("Memo", _settledInvoice.memo)
                 ],
-              ))
+              )),
+          Padding(
+            padding: EdgeInsets.only(top: 25.0),
+            child: RaisedButton(
+                onPressed: () => _reset(),
+                child: Text("Awesome! New Invoice!")),
+          )
         ]);
         break;
       case _PageStates.show_error:

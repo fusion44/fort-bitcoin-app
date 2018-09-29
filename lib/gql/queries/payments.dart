@@ -5,29 +5,59 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 String addInvoice = """
-mutation addInvoice(\$value: Int!, \$testnet: Boolean, \$memo: String) {
-  lnAddInvoice(value: \$value, testnet: \$testnet, memo: \$memo){
-    response{
-      rHash
-      paymentRequest
-      addIndex
+mutation addInvoice(\$value: Int!, \$memo: String) {
+  lnAddInvoice(value: \$value, memo: \$memo) {
+    result {
+      __typename
+      ... on AddInvoiceSuccess {
+        invoice {
+          rHash
+          paymentRequest
+          addIndex
+        }
+      }
+      ... on ServerError {
+        errorMessage
+      }
+      ... on AddInvoiceError {
+        paymentError
+      }
     }
   }
 }
 """;
 
 String invoiceSubscription = """
-subscription InvoicesSubscription(\$testnet:Boolean) {
-  invoiceSubscription(testnet: \$testnet){
-    memo
-    receipt
-    rPreimage
-    rHash
-    value
-    settled
-    creationDate
-    settleDate
-    paymentRequest
+subscription InvoicesSubscription {
+  invoiceSubscription {
+    __typename
+    ... on InvoiceSubSuccess {
+      invoice {
+        memo
+        receipt
+        rPreimage
+        rHash
+        value
+        settled
+        creationDate
+        settleDate
+        paymentRequest
+        descriptionHash
+        expiry
+        fallbackAddr
+        cltvExpiry
+        private
+        addIndex
+        settleIndex
+        amtPaid
+      }
+    }
+    ... on InvoiceSubError {
+      paymentError
+    }
+    ... on ServerError {
+      errorMessage
+    }
   }
 }
 """;
