@@ -12,13 +12,15 @@ class User {
   String _username;
   String get name => _username;
 
-  String _token;
-  String get token => _token;
+  String token;
 
-  User(this._userid, this._username, this._token);
+  bool _walletIsInitialized;
+  bool get walletIsInitialized => _walletIsInitialized;
+
+  User(this._userid, this._username, this.token, this._walletIsInitialized);
 
   static User empty() {
-    return User(0, "", "");
+    return User(0, "", "", false);
   }
 }
 

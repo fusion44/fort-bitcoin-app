@@ -83,6 +83,9 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
           for (var tx in payments) {
             _txData.add(LnPayment(tx));
           }
+        } else if (channelBalance["__typename"] == "WalletInstanceNotFound") {
+          onWalletNotFound();
+          return;
         } else {
           var error = DataFetchError(
               -1, listPayments["errorMessage"], _fetchPaymentsErrorkey);
@@ -96,6 +99,9 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
 
         if (channelBalance["__typename"] == "GetChannelBalanceSuccess") {
           _balanceData = LnChannelBalance(channelBalance["lnChannelBalance"]);
+        } else if (channelBalance["__typename"] == "WalletInstanceNotFound") {
+          onWalletNotFound();
+          return;
         } else {
           var error = DataFetchError(
               -1, channelBalance["errorMessage"], _fetchBalanceErrorkey);
@@ -121,6 +127,10 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
         _loading = false;
       });
     }
+  }
+
+  void onWalletNotFound() {
+    Navigator.pushNamed(this.context, "/init_wallet");
   }
 
   @override

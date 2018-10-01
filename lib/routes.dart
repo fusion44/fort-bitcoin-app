@@ -6,7 +6,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app/pages/home.dart';
-import 'package:mobile_app/pages/login.dart';
+import 'package:mobile_app/pages/init_wallet.dart';
+import 'package:mobile_app/pages/signup.dart';
 import 'package:mobile_app/pages/splash.dart';
 
 // Pages that have no route. They all reside in /home
@@ -16,6 +17,7 @@ enum BottomNavbarPages { balance, send, receive }
 
 final routes = {
   "/home": (BuildContext context) => new HomePage(),
-  "/login": (BuildContext context) => new LoginPage(),
+  "/signup": (BuildContext context) => new SignupPage(),
   "/splash": (BuildContext context) => new SplashPage(),
+  "/init_wallet": (BuildContext context) => new InitWalletPage(),
 };

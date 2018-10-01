@@ -5,18 +5,19 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/authhelper.dart';
 
-class LoginPage extends StatefulWidget {
+class RegisterWidget extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _RegisterWidgetState createState() => _RegisterWidgetState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterWidgetState extends State<RegisterWidget> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordController2 = TextEditingController();
+  final _emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +26,13 @@ class _LoginPageState extends State<LoginPage> {
     return new Scaffold(
       resizeToAvoidBottomPadding: false,
       body: Form(
+        autovalidate: true,
         key: _formKey,
         child: Padding(
           padding: EdgeInsets.all(40.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text(
-                "Fort Bitcoin",
-                style: theme.textTheme.display3,
-              ),
-              Text("Login", style: theme.textTheme.headline),
               TextFormField(
                   autofocus: true,
                   controller: _usernameController,
@@ -50,8 +47,36 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _passwordController,
                   obscureText: true,
                   validator: (value) {
-                    if (value.isEmpty) {
+                    if (value.length < 8) {
                       return "Minimum 8 characters";
+                    }
+                    if (value != _passwordController2.value.text) {
+                      return "Passwords don't match";
+                    }
+                  }),
+              TextFormField(
+                  decoration:
+                      InputDecoration(labelText: 'Verify your password'),
+                  controller: _passwordController2,
+                  obscureText: true,
+                  validator: (value) {
+                    if (value.length < 8) {
+                      return "Minimum 8 characters";
+                    }
+                    if (value != _passwordController.value.text) {
+                      return "Passwords don't match";
+                    }
+                  }),
+              TextFormField(
+                  decoration:
+                      InputDecoration(labelText: 'Email address (optional)'),
+                  controller: _emailController,
+                  validator: (value) {
+                    if (value != "" && !value.contains("@")) {
+                      return "Must be an email address";
+                    }
+                    if (value.length < 5) {
+                      return "Email address is to short";
                     }
                   }),
               Padding(
@@ -60,8 +85,10 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     if (_formKey.currentState.validate()) {
                       AuthHelper()
-                          .login(_usernameController.value.text,
-                              _passwordController.value.text)
+                          .register(
+                              _usernameController.value.text,
+                              _passwordController.value.text,
+                              _emailController.value.text)
                           .then((authState) {
                         if (authState == AuthState.loggedIn) {
                           Navigator.pushNamedAndRemoveUntil(
@@ -70,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                       });
                     }
                   },
-                  child: Text('Login'),
+                  child: Text("Register"),
                 ),
               ),
             ],

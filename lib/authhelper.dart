@@ -7,6 +7,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import 'dart:async';
 import 'dart:convert';
 import 'package:mobile_app/config.dart';
+import 'package:mobile_app/gql/queries/system_status.dart';
+import 'package:mobile_app/gql/queries/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_app/models.dart';
@@ -27,6 +29,7 @@ class AuthHelper {
   static String _url = "$endPoint";
   static String _authApi = '$_url/api-token-auth/';
   static String _verifyApi = '$_url/api-token-verify/';
+  static String _gql = '$_url/gql/';
 
   AuthState _authState;
   AuthState get authState => _authState;
@@ -50,8 +53,11 @@ class AuthHelper {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("authenticated") ?? false) {
-      _user = User(prefs.getInt("auth_id"), prefs.getString('auth_username'),
-          prefs.getString('auth_token'));
+      _user = User(
+          prefs.getInt("auth_id"),
+          prefs.getString("auth_username"),
+          prefs.getString("auth_token"),
+          prefs.getBool("wallet_is_initialized"));
     } else {
       _setState(AuthState.loggedOut);
       return _authState;
@@ -75,7 +81,27 @@ class AuthHelper {
     _streamController.close();
   }
 
-  Future<AuthState> login(String username, String password) async {
+  Future<AuthState> register(
+      String username, String password, String email) async {
+    String vars = jsonEncode(
+        {"username": username, "password": password, "email": email});
+    var json = jsonEncode({"query": createUser, "variables": vars});
+
+    return http
+        .post(_gql, headers: {"Content-Type": "application/json"}, body: json)
+        .then((http.Response response) {
+      if (response.statusCode == 200) {
+        // Wohoo! Registered, now get the login token
+        return login(username, password);
+      } else {
+        print("Error while registering");
+      }
+    }).catchError((onError) {
+      print(onError);
+    });
+  }
+
+  Future<dynamic> login(String username, String password) async {
     String json = jsonEncode({"username": username, "password": password});
     _setState(AuthState.loggingIn);
 
@@ -84,11 +110,10 @@ class AuthHelper {
             headers: {"Content-Type": "application/json"}, body: json)
         .then((response) {
       if (response.statusCode == 400) {
-        _reset(AuthState.loggedOut);
+        _reset(AuthState.loggedOut).then((onValue) => _authState);
       } else {
-        _successfulLogin(response);
+        _successfulLogin(response).then((onValue) => _authState);
       }
-      return _authState;
     }).catchError((error) {
       print(error);
       _reset(AuthState.loggedOut);
@@ -106,7 +131,15 @@ class AuthHelper {
 
   Future _successfulLogin(http.Response response) async {
     var body = jsonDecode(response.body);
-    _user = User(body["user"]['id'], body["user"]['username'], body["token"]);
+
+    if (_user == null) {
+      bool walletIsInitialized = await isWalletInitialized(body["token"]);
+      _user = User(body["user"]['id'], body["user"]['username'], body["token"],
+          walletIsInitialized);
+    } else {
+      _user.token = body["token"];
+    }
+
     _setState(AuthState.loggedIn);
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -114,6 +147,7 @@ class AuthHelper {
     await prefs.setInt("auth_id", _user.id);
     await prefs.setString('auth_token', _user.token);
     await prefs.setString('auth_username', _user.name);
+    await prefs.setBool("wallet_is_initialized", _user.walletIsInitialized);
   }
 
   Future _reset(AuthState state, {String error = ""}) async {
@@ -126,11 +160,39 @@ class AuthHelper {
     await prefs.setInt("auth_id", _user.id);
     await prefs.setString('auth_token', _user.token);
     await prefs.setString('auth_username', _user.name);
+    await prefs.setBool("wallet_is_initialized", _user.walletIsInitialized);
   }
 
   void _setState(AuthState newState) {
     _authState = newState;
     _streamController.add(_authState);
+  }
+
+  Future<bool> isWalletInitialized(String token) async {
+    var json = jsonEncode({"query": getInfoQuery});
+    var authToken = "JWT $token";
+    http.Response response = await http.post(_gql,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": authToken
+        },
+        body: json);
+
+    if (response.statusCode == 200) {
+      var json = jsonDecode(response.body);
+      var typename = json["data"]["lnGetInfo"]["__typename"];
+      if (typename == "GetInfoSuccess")
+        return true;
+      else if (typename == "WalletInstanceNotFound")
+        return false;
+      else if (typename == "ServerError") return false;
+
+      return true;
+    } else {
+      print("Error while fetching first get info object");
+    }
+
+    return false;
   }
 
   // Singleton stuff

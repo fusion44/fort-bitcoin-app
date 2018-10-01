@@ -4,6 +4,32 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+String getInfoQuery = """
+{
+  lnGetInfo {
+    __typename
+    ... on GetInfoSuccess {
+      lnInfo {
+        identityPubkey
+        alias
+        numPendingChannels
+        numActiveChannels
+        numPeers
+        blockHeight
+        blockHash
+        syncedToChain
+        testnet
+        bestHeaderTimestamp
+        version
+      }
+    }
+    ... on ServerError{ 
+      errorMessage
+    }
+  }
+}
+""";
+
 String getSystemStatus = """
 query getBlocks {
   systemstatus: getSystemStatus {

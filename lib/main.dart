@@ -10,7 +10,8 @@ import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/config.dart';
 import 'package:mobile_app/pages/home.dart';
-import 'package:mobile_app/pages/login.dart';
+import 'package:mobile_app/pages/init_wallet.dart';
+import 'package:mobile_app/pages/signup.dart';
 import 'package:mobile_app/pages/splash.dart';
 import 'package:mobile_app/routes.dart';
 
@@ -47,7 +48,7 @@ class FortBitcoinApp extends StatelessWidget {
               return MaterialApp(
                 title: "Fort Bitcoin",
                 theme: ThemeData.dark(),
-                home: LoginPage(),
+                home: SignupPage(),
               );
             default:
               return Center(child: Text("Implement me ${asyncSnapshot.data}"));
@@ -75,13 +76,23 @@ GraphQLProvider _buildGraphQLProvider() {
     ),
   );
 
+  Widget page;
+  String route;
+  if (AuthHelper().user.walletIsInitialized) {
+    page = HomePage();
+    route = "/home";
+  } else {
+    page = InitWalletPage();
+    route = "/init_wallet";
+  }
+
   return GraphQLProvider(
     client: client,
     child: MaterialApp(
       title: 'Fort Bitcoin',
       theme: ThemeData.dark(),
-      home: HomePage(),
-      initialRoute: '/home',
+      home: page,
+      initialRoute: route,
       routes: routes,
     ),
   );

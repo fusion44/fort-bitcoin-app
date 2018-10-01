@@ -85,6 +85,9 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
           for (var tx in transactions) {
             _txData.add(LnTransaction(tx));
           }
+        } else if (listTransactions["__typename"] == "WalletInstanceNotFound") {
+          onWalletNotFound();
+          return;
         } else {
           var error = DataFetchError(
               -1, listTransactions["errorMessage"], _fetchTransactionsErrorkey);
@@ -98,6 +101,9 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
 
         if (walletBalance["__typename"] == "GetWalletBalanceSuccess") {
           _balanceData = LnWalletBalance(walletBalance["lnWalletBalance"]);
+        } else if (walletBalance["__typename"] == "WalletInstanceNotFound") {
+          onWalletNotFound();
+          return;
         } else {
           var error = DataFetchError(
               -1, walletBalance["errorMessage"], _fetchBalanceErrorkey);
@@ -123,6 +129,10 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
         _loading = false;
       });
     }
+  }
+
+  void onWalletNotFound() {
+    Navigator.pushNamed(this.context, "/init_wallet");
   }
 
   @override
