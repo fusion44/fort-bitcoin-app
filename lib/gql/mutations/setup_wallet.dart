@@ -26,3 +26,23 @@ mutation createLightningWallet(\$name: String!, \$publicAlias: String) {
   }
 }
 """;
+
+String lnGenSeedQuery = """
+{
+  lnGenSeed {
+    __typename
+    ... on GenSeedSuccess {
+      lnSeed {
+        cipherSeedMnemonic
+        encipheredSeed
+      }
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on GenSeedError {
+      errorMessage
+    }
+  }
+}
+""";
