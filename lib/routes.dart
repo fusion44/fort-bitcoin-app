@@ -6,7 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app/pages/home.dart';
-import 'package:mobile_app/pages/init_wallet.dart';
+import 'package:mobile_app/pages/setup_wallet.dart';
 import 'package:mobile_app/pages/signup.dart';
 import 'package:mobile_app/pages/splash.dart';
 
@@ -19,5 +19,5 @@ final routes = {
   "/home": (BuildContext context) => new HomePage(),
   "/signup": (BuildContext context) => new SignupPage(),
   "/splash": (BuildContext context) => new SplashPage(),
-  "/init_wallet": (BuildContext context) => new InitWalletPage(),
+  "/setup_wallet": (BuildContext context) => new SetupWalletPage(),
 };

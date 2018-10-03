@@ -132,7 +132,7 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
   }
 
   void onWalletNotFound() {
-    Navigator.pushNamed(this.context, "/init_wallet");
+    Navigator.pushNamed(this.context, "/setup_wallet");
   }
 
   @override

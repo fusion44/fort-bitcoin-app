@@ -130,7 +130,7 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
   }
 
   void onWalletNotFound() {
-    Navigator.pushNamed(this.context, "/init_wallet");
+    Navigator.pushNamed(this.context, "/setup_wallet");
   }
 
   @override

@@ -10,7 +10,7 @@ import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/config.dart';
 import 'package:mobile_app/pages/home.dart';
-import 'package:mobile_app/pages/init_wallet.dart';
+import 'package:mobile_app/pages/setup_wallet.dart';
 import 'package:mobile_app/pages/signup.dart';
 import 'package:mobile_app/pages/splash.dart';
 import 'package:mobile_app/routes.dart';
@@ -82,8 +82,8 @@ GraphQLProvider _buildGraphQLProvider() {
     page = HomePage();
     route = "/home";
   } else {
-    page = InitWalletPage();
-    route = "/init_wallet";
+    page = SetupWalletPage();
+    route = "/setup_wallet";
   }
 
   return GraphQLProvider(
