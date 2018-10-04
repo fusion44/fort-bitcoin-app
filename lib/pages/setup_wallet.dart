@@ -4,6 +4,8 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/gql/mutations/setup_wallet.dart';
@@ -11,6 +13,7 @@ import 'package:mobile_app/gql/types/lnd_wallet.dart';
 import 'package:mobile_app/gql/types/lnseed.dart';
 import 'package:mobile_app/widgets/setup_wallet/create.dart';
 import 'package:mobile_app/widgets/setup_wallet/gen_seed.dart';
+import 'package:mobile_app/widgets/setup_wallet/verify_seed.dart';
 
 /*
 TODO: Refactor this class, as it has unnecessary complexity.
@@ -33,8 +36,15 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
   GraphQLClient _client;
   LNDWallet _wallet;
   LnSeed _seed;
+  int _seedVerifyPos1;
+  int _seedVerifyPos2;
+  bool _wordsMatch = false;
   int _currentStep = 0;
   Map<int, bool> _stepsFinished = {0: false, 1: false, 2: false, 3: false};
+
+  void _seedVerifyWordsMatch(bool match) {
+    _wordsMatch = match;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +60,17 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
           title: Text("seed"),
           content: GenSeedWidget(_seed, _loading, genSeed),
           isActive: true),
-      Step(title: Text("verify"), content: Text("3"), isActive: true),
+      Step(
+          title: Text("verify"),
+          content: _seed != null
+              ? VerifySeedWidget(
+                  _seedVerifyPos1,
+                  _seed.cipherSeedMnemonic[_seedVerifyPos1],
+                  _seedVerifyPos2,
+                  _seed.cipherSeedMnemonic[_seedVerifyPos2],
+                  this._seedVerifyWordsMatch)
+              : Container(),
+          isActive: true),
       Step(title: Text("init"), content: Text("4"), isActive: true),
     ];
 
@@ -85,11 +105,24 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
                     });
                   }
                   break;
+                case 2:
+                  if (_wordsMatch) {
+                    setState(() {
+                      _stepsFinished[2] = true;
+                      _currentStep = _currentStep + 1;
+                      _loading = false;
+                    });
+                  }
+                  break;
                 default:
               }
               setState(() {});
             },
-            onStepCancel: () {},
+            onStepCancel: () {
+              setState(() {
+                _currentStep -= 1;
+              });
+            },
           ),
         ));
   }
@@ -183,7 +216,11 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
               SnackBar(content: Text("An unknown error occured.")));
           return;
       }
+
+      var rng = Random();
       setState(() {
+        _seedVerifyPos1 = rng.nextInt(12); // check one of the first seed half
+        _seedVerifyPos2 = rng.nextInt(12) + 12; // check second seed half
         _stepsFinished[1] = true;
         _loading = false;
       });
