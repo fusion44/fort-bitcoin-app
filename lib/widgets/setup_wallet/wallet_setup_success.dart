@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/gql/queries/system_status.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WalletSetupSuccessWidget extends StatefulWidget {
   _WalletSetupSuccessWidgetState createState() =>
@@ -43,6 +44,10 @@ class _WalletSetupSuccessWidgetState extends State<WalletSetupSuccessWidget> {
               bool syncedToChain = data["lnInfo"]["syncedToChain"];
               if (syncedToChain) {
                 SchedulerBinding.instance.addPostFrameCallback((_) {
+                  SharedPreferences.getInstance().then((prefs) {
+                    prefs.setBool("wallet_is_initialized", true);
+                  });
+
                   Navigator.pushNamedAndRemoveUntil(
                       context, "/home", (_) => false);
                 });
