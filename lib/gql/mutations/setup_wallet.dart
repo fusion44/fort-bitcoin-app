@@ -46,3 +46,32 @@ String lnGenSeedQuery = """
   }
 }
 """;
+
+String lnInitWallet = """
+mutation initWallet(\$aezeedPassphrase: String, \$cipherSeedMnemonic: [String], \$recoveryWindow: Int, \$walletPassword: String!) {
+  lnInitWallet(aezeedPassphrase: \$aezeedPassphrase, cipherSeedMnemonic: \$cipherSeedMnemonic, recoveryWindow: \$recoveryWindow, walletPassword: \$walletPassword) {
+    __typename
+    ... on ServerError {
+      errorMessage
+    }
+    ... on InitWalletError {
+      errorMessage
+    }
+    ... on InitWalletSuccess {
+      info {
+        identityPubkey
+        alias
+        numPendingChannels
+        numActiveChannels
+        numPeers
+        blockHeight
+        blockHash
+        syncedToChain
+        testnet
+        bestHeaderTimestamp
+        version
+      }
+    }
+  }
+}
+""";

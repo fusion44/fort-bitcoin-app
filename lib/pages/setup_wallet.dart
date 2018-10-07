@@ -10,10 +10,13 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/gql/mutations/setup_wallet.dart';
 import 'package:mobile_app/gql/types/lnd_wallet.dart';
+import 'package:mobile_app/gql/types/lninfo.dart';
 import 'package:mobile_app/gql/types/lnseed.dart';
 import 'package:mobile_app/widgets/setup_wallet/create.dart';
 import 'package:mobile_app/widgets/setup_wallet/gen_seed.dart';
+import 'package:mobile_app/widgets/setup_wallet/init_wallet.dart';
 import 'package:mobile_app/widgets/setup_wallet/verify_seed.dart';
+import 'package:mobile_app/widgets/setup_wallet/wallet_setup_success.dart';
 
 /*
 TODO: Refactor this class, as it has unnecessary complexity.
@@ -31,16 +34,22 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _aliasController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _recoveryController = TextEditingController();
 
   bool _loading = false;
   GraphQLClient _client;
-  LNDWallet _wallet;
   LnSeed _seed;
   int _seedVerifyPos1;
   int _seedVerifyPos2;
   bool _wordsMatch = false;
   int _currentStep = 0;
   Map<int, bool> _stepsFinished = {0: false, 1: false, 2: false, 3: false};
+
+  // if true, we have completed all steps and the
+  // wallet is synchronizing
+  bool _finished = false;
+  LnInfoType _initialInfoType;
 
   void _seedVerifyWordsMatch(bool match) {
     _wordsMatch = match;
@@ -49,6 +58,13 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
   @override
   Widget build(BuildContext context) {
     _client = GraphQLProvider.of(context).value;
+
+    if (_finished) {
+      return Scaffold(
+        appBar: AppBar(leading: Container(), title: Text("Sync with chain")),
+        body: WalletSetupSuccessWidget(),
+      );
+    }
 
     var steps = [
       Step(
@@ -71,7 +87,11 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
                   this._seedVerifyWordsMatch)
               : Container(),
           isActive: true),
-      Step(title: Text("init"), content: Text("4"), isActive: true),
+      Step(
+          title: Text("init"),
+          content: InitWalletWidget(
+              _recoveryController, _passwordController, _loading),
+          isActive: true),
     ];
 
     return WillPopScope(
@@ -114,6 +134,11 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
                     });
                   }
                   break;
+                case 3:
+                  if (!_stepsFinished[3]) {
+                    initWallet();
+                  }
+                  break;
                 default:
               }
               setState(() {});
@@ -151,7 +176,6 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
       String typename = data.data["createLightningWallet"]["__typename"];
       switch (typename) {
         case "CreateWalletSuccess":
-          _wallet = LNDWallet(data.data["createLightningWallet"]["wallet"]);
           break;
         case "CreateWalletExistsError":
           // TODO: retrieve existing wallet for user on the server
@@ -222,6 +246,72 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
         _seedVerifyPos1 = rng.nextInt(12); // check one of the first seed half
         _seedVerifyPos2 = rng.nextInt(12) + 12; // check second seed half
         _stepsFinished[1] = true;
+        _loading = false;
+      });
+    }).catchError((error) {
+      setState(() {
+        _loading = false;
+      });
+
+      _scaffoldKey.currentState.showSnackBar(
+          SnackBar(content: Text("An error occured, check the logs")));
+      print(error);
+    });
+  }
+
+  void initWallet() {
+    setState(() {
+      _loading = true;
+    });
+    var v = {
+      "walletPassword": _passwordController.value.text,
+      "cipherSeedMnemonic": _seed.cipherSeedMnemonic
+    };
+    _client
+        .query(QueryOptions(
+            fetchPolicy: FetchPolicy.networkOnly,
+            document: lnInitWallet,
+            variables: v))
+        .then((data) {
+      String typename = data.data["lnInitWallet"]["__typename"];
+      switch (typename) {
+        case "InitWalletSuccess":
+          LnInfoType info = LnInfoType(data.data["lnInitWallet"]["info"]);
+          setState(() {
+            _initialInfoType = info;
+            _stepsFinished[3] = true;
+            _loading = false;
+            _finished = true;
+          });
+          return;
+        case "InitWalletInstanceNotFound":
+          _scaffoldKey.currentState
+              .showSnackBar(SnackBar(content: Text("Wallet not found.")));
+          return;
+        case "InitWalletError":
+          String msg = data.data["lnInitWallet"]["errorMessage"];
+          _scaffoldKey.currentState
+              .showSnackBar(SnackBar(content: Text("Error: $msg")));
+          return;
+        case "InitWalletIsInitialized":
+          _scaffoldKey.currentState.showSnackBar(
+              SnackBar(content: Text("Wallet is already initialized")));
+          break;
+        case "InitWalletPasswordToShortError":
+          _scaffoldKey.currentState
+              .showSnackBar(SnackBar(content: Text("Password is to short")));
+          break;
+        case "ServerError":
+          String msg = data.data["lnInitWallet"]["errorMessage"];
+          _scaffoldKey.currentState
+              .showSnackBar(SnackBar(content: Text("Error: $msg")));
+          break;
+        default:
+          _scaffoldKey.currentState.showSnackBar(
+              SnackBar(content: Text("An unknown error occured.")));
+          break;
+      }
+      setState(() {
         _loading = false;
       });
     }).catchError((error) {
