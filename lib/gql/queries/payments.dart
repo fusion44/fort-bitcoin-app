@@ -131,3 +131,20 @@ mutation sendPayment(\$payReq: String!) {
   }
 }
 """;
+
+String newOnchainAddress = """
+{
+  lnNewAddress {
+    __typename
+    ... on NewAddressSuccess {
+      address
+    }
+    ... on NewAddressError {
+      errorMessage
+    }
+    ... on ServerError {
+      errorMessage
+    }
+  }
+}
+""";
