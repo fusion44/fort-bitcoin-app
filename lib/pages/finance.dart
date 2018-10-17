@@ -15,7 +15,7 @@ class FinancePage extends StatefulWidget {
 
 class _FinancePageState extends State<FinancePage> {
   int _bottomNavbarIndex = 0;
-  BottomNavbarPages _page = BottomNavbarPages.balance;
+  BottomNavbarPagesFin _page = BottomNavbarPagesFin.balance;
   List<BottomNavigationBarItem> navItems = [
     BottomNavigationBarItem(
         title: const Text("Balance"),
@@ -31,16 +31,16 @@ class _FinancePageState extends State<FinancePage> {
       _bottomNavbarIndex = index;
       switch (index) {
         case 0:
-          _page = BottomNavbarPages.balance;
+          _page = BottomNavbarPagesFin.balance;
           break;
         case 1:
-          _page = BottomNavbarPages.send;
+          _page = BottomNavbarPagesFin.send;
           break;
         case 2:
-          _page = BottomNavbarPages.receive;
+          _page = BottomNavbarPagesFin.receive;
           break;
         default:
-          _page = BottomNavbarPages.balance;
+          _page = BottomNavbarPagesFin.balance;
       }
     });
   }
@@ -49,13 +49,13 @@ class _FinancePageState extends State<FinancePage> {
   Widget build(BuildContext context) {
     Widget body;
     switch (_page) {
-      case BottomNavbarPages.balance:
+      case BottomNavbarPagesFin.balance:
         body = BalancesPage(ConfigurationBloc().config.testnet);
         break;
-      case BottomNavbarPages.send:
+      case BottomNavbarPagesFin.send:
         body = SendPage();
         break;
-      case BottomNavbarPages.receive:
+      case BottomNavbarPagesFin.receive:
         body = ReceivePage();
         break;
       default:

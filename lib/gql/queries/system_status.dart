@@ -78,3 +78,43 @@ query getBlocks {
   }
 }
 """;
+
+String listChannelsQuery = """
+{
+  lnListChannels {
+    __typename
+    ... on ListChannelsSuccess {
+      channels {
+        active
+        remotePubkey
+        channelPoint
+        chanId
+        capacity
+        localBalance
+        remoteBalance
+        commitFee
+        commitWeight
+        feePerKw
+        unsettledBalance
+        totalSatoshisSent
+        totalSatoshisReceived
+        numUpdates
+        csvDelay
+        private
+        pendingHtlcs {
+          incoming
+          amount
+          hashLock
+          expirationHeight
+        }
+      }
+    }
+    ... on ListChannelsError {
+      errorMessage
+    }
+    ... on ServerError {
+      errorMessage
+    }
+  }
+}
+""";

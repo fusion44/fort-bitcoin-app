@@ -6,6 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app/authhelper.dart';
+import 'package:mobile_app/pages/connectivity.dart';
 import 'package:mobile_app/pages/finance.dart';
 import 'package:mobile_app/pages/stats.dart';
 import 'package:mobile_app/routes.dart';
@@ -59,6 +60,13 @@ class FortBtcDrawerState extends State<FortBtcDrawer> {
             title: Text(FinancePage.appBarText),
             onTap: () {
               widget._pageChange(DrawerPages.finance);
+              Navigator.pop(context);
+            }),
+        ListTile(
+            leading: Icon(ConnectivityPage.icon),
+            title: Text(ConnectivityPage.appBarText),
+            onTap: () {
+              widget._pageChange(DrawerPages.connectivity);
               Navigator.pop(context);
             }),
         ListTile(
