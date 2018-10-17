@@ -118,3 +118,29 @@ String listChannelsQuery = """
   }
 }
 """;
+
+String listPeersQuery = """
+{
+  lnListPeers {
+    __typename
+    ... on ListPeersSuccess {
+      peers {
+        pubKey
+        address
+        bytesSent
+        bytesRecv
+        satSent
+        satRecv
+        inbound
+        pingTime
+      }
+    }
+    ... on ListPeersError {
+      errorMessage
+    }
+    ... on ServerError {
+      errorMessage
+    }
+  }
+}
+""";

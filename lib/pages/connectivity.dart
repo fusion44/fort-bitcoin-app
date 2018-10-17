@@ -7,6 +7,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import 'package:flutter/material.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/pages/channels.dart';
+import 'package:mobile_app/pages/peers.dart';
 import 'package:mobile_app/routes.dart';
 
 class ConnectivityPage extends StatefulWidget {
@@ -51,7 +52,7 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
         body = ChannelsPage(ConfigurationBloc().config.testnet);
         break;
       case BottomNavbarPagesConn.peers:
-        body = Center(child: Text("Beers!"));
+        body = PeersPage();
         break;
       default:
         body = Center(child: Text("implement me $_page"));
