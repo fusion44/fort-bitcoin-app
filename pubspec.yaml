@@ -25,6 +25,7 @@ dependencies:
   shared_preferences: 0.4.2
   date_format: ^1.0.5
   share: ^0.5.3
+  unicorndial: "^1.1.5"
 
 dev_dependencies:
   flutter_test:
