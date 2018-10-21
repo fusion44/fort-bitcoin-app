@@ -42,7 +42,8 @@ class _PeersPageState extends State<PeersPage> {
   String _nodeId = "";
   String _nodeHost = "";
   BuildContext _connectingDialogContext;
-
+  final _formKey = GlobalKey<FormState>();
+  final _combinedController = TextEditingController();
   bool _permanent = false;
 
   @override
@@ -94,12 +95,6 @@ class _PeersPageState extends State<PeersPage> {
       _nodeHost = "";
       _currentState = _PageStates.initial;
       _error = "";
-    });
-  }
-
-  _connectManual() {
-    setState(() {
-      _currentState = _PageStates.input_manual;
     });
   }
 
@@ -188,7 +183,7 @@ class _PeersPageState extends State<PeersPage> {
 
     childButtons.add(UnicornButton(
         currentButton: FloatingActionButton(
-            onPressed: this._connectManual,
+            onPressed: () => _showConnectManInputDialog(),
             heroTag: "manual",
             backgroundColor: theme.accentColor,
             mini: true,
@@ -250,6 +245,59 @@ class _PeersPageState extends State<PeersPage> {
         _error = err.toString();
       });
     });
+  }
+
+  Future<Null> _showConnectManInputDialog() async {
+    return showDialog<Null>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter peer address'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Padding(
+                padding: EdgeInsets.all(40.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    TextFormField(
+                      autofocus: true,
+                      controller: _combinedController,
+                      decoration: InputDecoration(
+                          labelText: 'Enter full address (pubkey@host:port)'),
+                      validator: (value) {
+                        if (value.isNotEmpty && !value.contains("@") ||
+                            !value.contains(":")) {
+                          return "Format: pubkey@host:port";
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                if (_formKey.currentState.validate()) {
+                  var split = _combinedController.value.text.split("@");
+                  Navigator.of(context).pop();
+                  setState(() {
+                    _nodeId = split[0];
+                    _nodeHost = split[1];
+                    _currentState = _PageStates.show_data;
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<Null> _showConnectingDialog() async {
