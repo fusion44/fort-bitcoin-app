@@ -6,7 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/gql/mutations/peers.dart';
+import 'package:mobile_app/gql/mutations/peers.dart' as peerQueries;
 import 'package:mobile_app/gql/queries/system_status.dart';
 import 'package:mobile_app/gql/types/lnpeer.dart';
 import 'package:mobile_app/models.dart';
@@ -190,7 +190,7 @@ class _PeersPageState extends State<PeersPage> {
             child: Icon(Icons.keyboard))));
 
     var peerCards = List<PeerDisplay>();
-    for (var p in _peers) peerCards.add(PeerDisplay(p));
+    for (var p in _peers) peerCards.add(PeerDisplay(p, _disconnectPeer));
 
     return Scaffold(
       body: RefreshIndicator(
@@ -212,12 +212,48 @@ class _PeersPageState extends State<PeersPage> {
     );
   }
 
+  _disconnectPeer(key) async {
+    try {
+      QueryResult result = await _client.query(QueryOptions(
+          document: peerQueries.disconnectPeerMutation,
+          variables: {"pubkey": key}));
+
+      String typename = result.data["lnDisconnectPeer"]["__typename"];
+      switch (typename) {
+        case "DisconnectPeerSuccess":
+          _peers.retainWhere((LnPeer peer) {
+            return peer.pubKey != key;
+          });
+          setState(() {
+            _peers = _peers;
+          });
+          break;
+        case "ServerError":
+        case "DisconnectPeerError":
+          setState(() {
+            _currentState = _PageStates.show_error;
+            _error = result.data["lnDisconnectPeer"]["errorMessage"];
+          });
+          break;
+        default:
+          print("Implement me $typename");
+      }
+    } catch (e) {
+      setState(() {
+        _currentState = _PageStates.show_error;
+        _error = e.toString();
+      });
+      print(e);
+    }
+  }
+
   void _connectPeer() {
     _showConnectingDialog();
 
     var v = {"pubkey": _nodeId, "host": _nodeHost, "perm": _permanent};
     _client
-        .query(QueryOptions(document: connectPeerMutation, variables: v))
+        .query(QueryOptions(
+            document: peerQueries.connectPeerMutation, variables: v))
         .then((data) {
       String typename = data.data["lnConnectPeer"]["__typename"];
       switch (typename) {

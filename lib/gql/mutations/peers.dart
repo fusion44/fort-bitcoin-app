@@ -24,3 +24,22 @@ mutation ConnectPeerMutation(\$pubkey: String!, \$host: String!, \$perm: Boolean
   }
 }
 """;
+
+String disconnectPeerMutation = """
+mutation DisconnectPeer(\$pubkey: String!) {
+  lnDisconnectPeer(pubkey: \$pubkey) {
+    __typename
+    ... on DisconnectPeerSuccess {
+      result
+      pubkey
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on DisconnectPeerError {
+      errorMessage
+      pubkey
+    }
+  }
+}
+""";
