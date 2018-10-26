@@ -4,13 +4,12 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/gql/mutations/peers.dart' as peerQueries;
-import 'package:mobile_app/gql/queries/system_status.dart';
 import 'package:mobile_app/gql/types/lnpeer.dart';
-import 'package:mobile_app/models.dart';
-import 'package:mobile_app/widgets/card_error.dart';
 import 'package:mobile_app/widgets/connect_peer_confirm.dart';
 import 'package:mobile_app/widgets/peer_display.dart';
 import 'package:mobile_app/widgets/scale_in_animated_icon.dart';
@@ -18,6 +17,9 @@ import 'package:qrcode_reader/QRCodeReader.dart';
 import 'package:unicorndial/unicorndial.dart';
 
 class PeersPage extends StatefulWidget {
+  final PeerBloc _peersBloc;
+  PeersPage(this._peersBloc);
+
   @override
   _PeersPageState createState() => _PeersPageState();
 }
@@ -52,36 +54,7 @@ class _PeersPageState extends State<PeersPage> {
     if (_client == null) {
       _client = GraphQLProvider.of(context).value;
     }
-    _client.query(QueryOptions(document: listPeersQuery)).then((data) {
-      String typename = data.data["lnListPeers"]["__typename"];
-      switch (typename) {
-        case "ListPeersSuccess":
-          _peers = [];
-          for (Map peer in data.data["lnListPeers"]["peers"]) {
-            _peers.add(LnPeer(peer));
-          }
-          setState(() {
-            _peers = _peers;
-            _loading = false;
-            _error = "";
-          });
-          break;
-        case "ListPeersError":
-        case "ServerError":
-          setState(() {
-            _error = data.data["lnListPeers"]["errorMessage"];
-            _loading = false;
-          });
-          break;
-        default:
-      }
-    }).catchError((error) {
-      setState(() {
-        _error = error.toString();
-        _loading = false;
-      });
-      print(error);
-    });
+    widget._peersBloc.loadPeers();
   }
 
   _reset() {
@@ -130,47 +103,65 @@ class _PeersPageState extends State<PeersPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return LinearProgressIndicator();
+    return BlocBuilder<PeerEvent, PeerState>(
+      bloc: widget._peersBloc,
+      builder: (
+        BuildContext context,
+        PeerState peerState,
+      ) {
+        if (peerState.type == PeerEventType.startConnectPeer) {
+          _showConnectingDialog();
+        } else if (peerState.type == PeerEventType.finishConnectPeer) {
+          if (_connectingDialogContext != null) {
+            Navigator.of(_connectingDialogContext).pop();
+            _connectingDialogContext = null;
+          }
+          if (peerState.error.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              Scaffold.of(context)
+                  .showSnackBar(SnackBar(content: Text(peerState.error)));
+            });
+          }
+        }
 
-    if (_error.isNotEmpty) {
-      return Column(
-        children: <Widget>[
-          ErrorDisplayCard("Error", [DataFetchError(0, _error, "")]),
-          RaisedButton(
-            child: Text("OK"),
-            onPressed: () => _reset(),
-          )
-        ],
-      );
-    }
+        ThemeData theme = Theme.of(context);
+        _peers = peerState.peers;
 
-    ThemeData theme = Theme.of(context);
-    switch (_currentState) {
-      case _PageStates.initial:
-        _currentPage = _buildInitialPage(theme);
-        break;
-      case _PageStates.scanning:
-        _currentPage = Container();
-        break;
-      case _PageStates.show_data:
-        _currentPage = ConnectPeerConfirmWidget(
-          _nodeId,
-          _nodeHost,
-          _connectPeer,
-          () => _reset(),
-          (bool state) {
-            _permanent = state;
-          },
-        );
-        break;
-      default:
-        print("Implement me $_currentState");
-    }
+        switch (_currentState) {
+          case _PageStates.initial:
+            _currentPage = _buildInitialPage(peerState, theme);
+            break;
+          case _PageStates.scanning:
+            _currentPage = Container();
+            break;
+          case _PageStates.show_data:
+            _currentPage = ConnectPeerConfirmWidget(
+              _nodeId,
+              _nodeHost,
+              _connectPeer,
+              () => _reset(),
+              (bool state) {
+                _permanent = state;
+              },
+            );
+            break;
+          case _PageStates.show_result_error:
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              Scaffold.of(context)
+                  .showSnackBar(SnackBar(content: Text(_error)));
+              _reset();
+            });
+            break;
+          default:
+            print("Implement me $_currentState");
+        }
 
-    return _currentPage;
+        return _currentPage;
+      },
+    );
   }
 
-  Widget _buildInitialPage(ThemeData theme) {
+  Widget _buildInitialPage(PeerState peerState, ThemeData theme) {
     var childButtons = List<UnicornButton>();
 
     childButtons.add(UnicornButton(
@@ -189,13 +180,16 @@ class _PeersPageState extends State<PeersPage> {
             mini: true,
             child: Icon(Icons.keyboard))));
 
-    var peerCards = List<PeerDisplay>();
-    for (var p in _peers) peerCards.add(PeerDisplay(p, _disconnectPeer));
+    var peerCards = List<Widget>();
+
+    for (var p in peerState.peers) {
+      peerCards.add(PeerDisplay(p, _disconnectPeer));
+    }
 
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          print("TODO: Refresh");
+          widget._peersBloc.dispatch(LoadPeers(true));
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -247,40 +241,9 @@ class _PeersPageState extends State<PeersPage> {
     }
   }
 
-  void _connectPeer() {
-    _showConnectingDialog();
-
-    var v = {"pubkey": _nodeId, "host": _nodeHost, "perm": _permanent};
-    _client
-        .query(QueryOptions(
-            document: peerQueries.connectPeerMutation, variables: v))
-        .then((data) {
-      String typename = data.data["lnConnectPeer"]["__typename"];
-      switch (typename) {
-        case "ConnectPeerSuccess":
-          _reset();
-          _showConnectSuccessDialog();
-          break;
-        case "ServerError":
-        case "ConnectPeerError":
-          if (_connectingDialogContext != null) {
-            Navigator.of(_connectingDialogContext).pop();
-          }
-          setState(() {
-            _connectingDialogContext = null;
-            _currentState = _PageStates.show_error;
-            _error = data.data["lnConnectPeer"]["errorMessage"];
-          });
-          break;
-        default:
-          break;
-      }
-    }).catchError((err) {
-      setState(() {
-        _currentState = _PageStates.show_error;
-        _error = err.toString();
-      });
-    });
+  _connectPeer() {
+    _currentState = _PageStates.initial;
+    widget._peersBloc.connectPeer(_nodeId, _nodeHost, _permanent);
   }
 
   Future<Null> _showConnectManInputDialog() async {
@@ -337,48 +300,54 @@ class _PeersPageState extends State<PeersPage> {
   }
 
   Future<Null> _showConnectingDialog() async {
-    return showDialog<Null>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        _connectingDialogContext = context;
-        return AlertDialog(
-          title: Text('Connecting!'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[CircularProgressIndicator()],
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      return showDialog<Null>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          _connectingDialogContext = context;
+          return AlertDialog(
+            title: Text('Connecting!'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[CircularProgressIndicator()],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    });
   }
 
   Future<Null> _showConnectSuccessDialog() async {
-    return showDialog<Null>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Connected!'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                ScaleInAnimatedIcon(
-                  Icons.check_circle_outline,
-                  size: 150.0,
-                )
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        await showDialog<Null>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Connected!'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    ScaleInAnimatedIcon(
+                      Icons.check_circle_outline,
+                      size: 150.0,
+                    )
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+            );
+          },
         );
       },
     );
