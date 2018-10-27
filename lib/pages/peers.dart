@@ -17,9 +17,6 @@ import 'package:qrcode_reader/QRCodeReader.dart';
 import 'package:unicorndial/unicorndial.dart';
 
 class PeersPage extends StatefulWidget {
-  final PeerBloc _peersBloc;
-  PeersPage(this._peersBloc);
-
   @override
   _PeersPageState createState() => _PeersPageState();
 }
@@ -39,6 +36,7 @@ class _PeersPageState extends State<PeersPage> {
   _PageStates _currentState = _PageStates.initial;
   Widget _currentPage;
   GraphQLClient _client;
+  PeerBloc _peerBloc;
   List<LnPeer> _peers;
   String _error = "";
   String _nodeId = "";
@@ -54,7 +52,10 @@ class _PeersPageState extends State<PeersPage> {
     if (_client == null) {
       _client = GraphQLProvider.of(context).value;
     }
-    widget._peersBloc.loadPeers();
+    if (_peerBloc == null) {
+      _peerBloc = BlocProvider.of<PeerBloc>(context);
+    }
+    _peerBloc.loadPeers();
   }
 
   _reset() {
@@ -104,7 +105,7 @@ class _PeersPageState extends State<PeersPage> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PeerEvent, PeerState>(
-      bloc: widget._peersBloc,
+      bloc: _peerBloc,
       builder: (
         BuildContext context,
         PeerState peerState,
@@ -189,7 +190,7 @@ class _PeersPageState extends State<PeersPage> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          widget._peersBloc.dispatch(LoadPeers(true));
+          _peerBloc.dispatch(LoadPeers(true));
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -243,7 +244,7 @@ class _PeersPageState extends State<PeersPage> {
 
   _connectPeer() {
     _currentState = _PageStates.initial;
-    widget._peersBloc.connectPeer(_nodeId, _nodeHost, _permanent);
+    _peerBloc.connectPeer(_nodeId, _nodeHost, _permanent);
   }
 
   Future<Null> _showConnectManInputDialog() async {

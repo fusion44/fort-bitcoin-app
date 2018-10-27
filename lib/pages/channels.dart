@@ -11,13 +11,13 @@ import 'package:mobile_app/widgets/channel_display.dart';
 
 class ChannelsPage extends StatelessWidget {
   final bool _testnet;
-  final ChannelBloc _channelBloc;
-  ChannelsPage(this._channelBloc, [this._testnet = false]);
+  ChannelsPage([this._testnet = false]);
 
   @override
   Widget build(BuildContext context) {
+    ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
     return BlocBuilder<ChannelEvent, ChannelState>(
-      bloc: _channelBloc,
+      bloc: channelBloc,
       builder: (
         BuildContext context,
         ChannelState channelState,
@@ -29,7 +29,7 @@ class ChannelsPage extends StatelessWidget {
 
         return RefreshIndicator(
             onRefresh: () async {
-              _channelBloc.loadChannels(true);
+              channelBloc.loadChannels(true);
             },
             child: Column(
               children: <Widget>[

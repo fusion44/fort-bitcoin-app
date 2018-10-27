@@ -5,6 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/blocs/channels_bloc.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
@@ -42,8 +43,12 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
     if (_client == null) {
       _client = GraphQLProvider.of(context).value;
     }
-    _peersBloc = PeerBloc(_client);
-    _channelBloc = ChannelBloc(_client);
+    if (_peersBloc == null) {
+      _peersBloc = PeerBloc(_client);
+    }
+    if (_channelBloc == null) {
+      _channelBloc = ChannelBloc(_client);
+    }
   }
 
   void nav(int index) {
@@ -67,21 +72,28 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
     Widget body;
     switch (_page) {
       case BottomNavbarPagesConn.channels:
-        body = ChannelsPage(_channelBloc, ConfigurationBloc().config.testnet);
+        body = ChannelsPage(ConfigurationBloc().config.testnet);
         break;
       case BottomNavbarPagesConn.peers:
-        body = PeersPage(_peersBloc);
+        body = PeersPage();
         break;
       default:
         body = Center(child: Text("implement me $_page"));
     }
-    return new Scaffold(
-      resizeToAvoidBottomPadding: false,
-      body: body,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _bottomNavbarIndex,
-        onTap: nav,
-        items: navItems,
+
+    return BlocProvider<PeerBloc>(
+      bloc: _peersBloc,
+      child: BlocProvider<ChannelBloc>(
+        bloc: _channelBloc,
+        child: Scaffold(
+          resizeToAvoidBottomPadding: false,
+          body: body,
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _bottomNavbarIndex,
+            onTap: nav,
+            items: navItems,
+          ),
+        ),
       ),
     );
   }
