@@ -6,6 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:mobile_app/blocs/channels_bloc.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/pages/channels.dart';
@@ -22,6 +23,8 @@ class ConnectivityPage extends StatefulWidget {
 
 class _ConnectivityPageState extends State<ConnectivityPage> {
   PeerBloc _peersBloc;
+  ChannelBloc _channelBloc;
+
   int _bottomNavbarIndex = 0;
   BottomNavbarPagesConn _page = BottomNavbarPagesConn.channels;
   List<BottomNavigationBarItem> navItems = [
@@ -40,6 +43,7 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
       _client = GraphQLProvider.of(context).value;
     }
     _peersBloc = PeerBloc(_client);
+    _channelBloc = ChannelBloc(_client);
   }
 
   void nav(int index) {
@@ -63,7 +67,7 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
     Widget body;
     switch (_page) {
       case BottomNavbarPagesConn.channels:
-        body = ChannelsPage(ConfigurationBloc().config.testnet);
+        body = ChannelsPage(_channelBloc, ConfigurationBloc().config.testnet);
         break;
       case BottomNavbarPagesConn.peers:
         body = PeersPage(_peersBloc);
