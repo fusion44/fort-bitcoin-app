@@ -125,6 +125,7 @@ String listPeersQuery = """
     __typename
     ... on ListPeersSuccess {
       peers {
+        hasChannel
         pubKey
         address
         bytesSent

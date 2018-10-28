@@ -76,6 +76,15 @@ class _PeerDisplayState extends State<PeerDisplay> {
                 SimpleDataRow(left: "Sats recv", right: widget._data.satRecv),
                 SimpleDataRow(left: "Inbound", right: widget._data.inbound),
                 SimpleDataRow(left: "Ping", right: widget._data.pingTime),
+                widget._data.hasChannel
+                    ? SimpleDataRow(
+                        left: "Open Channel",
+                        right: "Yes",
+                      )
+                    : SimpleDataRow(
+                        left: "Open Channel",
+                        right: "No",
+                      )
               ],
             ),
           ),

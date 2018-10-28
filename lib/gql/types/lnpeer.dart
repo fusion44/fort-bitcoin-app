@@ -13,6 +13,7 @@ class LnPeer {
   int satRecv;
   bool inbound;
   int pingTime;
+  bool hasChannel;
 
   LnPeer(Map<String, dynamic> data) {
     pubKey = data["pubKey"];
@@ -23,5 +24,6 @@ class LnPeer {
     satRecv = data["satRecv"];
     inbound = data["inbound"];
     pingTime = data["pingTime"];
+    hasChannel = data["hasChannel"];
   }
 }
