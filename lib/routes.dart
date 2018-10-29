@@ -12,7 +12,7 @@ import 'package:mobile_app/pages/splash.dart';
 
 // Pages that have no route. They all reside in /home
 // and are switched via drawer or bottom nav bar
-enum DrawerPages { finance, connectivity, stats }
+enum DrawerPages { finance, connectivity, stats, manage_wallet }
 enum BottomNavbarPagesFin { balance, send, receive }
 enum BottomNavbarPagesConn { channels, peers }
 

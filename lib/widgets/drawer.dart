@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/pages/connectivity.dart';
 import 'package:mobile_app/pages/finance.dart';
+import 'package:mobile_app/pages/manage_wallet.dart';
 import 'package:mobile_app/pages/stats.dart';
 import 'package:mobile_app/routes.dart';
 
@@ -74,6 +75,13 @@ class FortBtcDrawerState extends State<FortBtcDrawer> {
             title: Text(StatsPage.appBarText),
             onTap: () {
               widget._pageChange(DrawerPages.stats);
+              Navigator.pop(context);
+            }),
+        ListTile(
+            leading: Icon(ManageWalletPage.icon),
+            title: Text(ManageWalletPage.appBarText),
+            onTap: () {
+              widget._pageChange(DrawerPages.manage_wallet);
               Navigator.pop(context);
             }),
       ]);

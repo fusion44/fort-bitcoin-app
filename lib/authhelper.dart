@@ -13,6 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_app/models.dart';
 
+enum WalletState { notInitialized, notRunning, ready, unknown }
+
 // Depicts the current auth state
 enum AuthState {
   loggingIn,
@@ -32,6 +34,10 @@ class AuthHelper {
   static String _gql = '$_url/gql/';
 
   AuthState _authState;
+
+  var _walletState = WalletState.unknown;
+  WalletState get walletState => _walletState;
+
   AuthState get authState => _authState;
   User _user;
   User get user => _user;
@@ -132,8 +138,11 @@ class AuthHelper {
   Future _successfulLogin(http.Response response) async {
     var body = jsonDecode(response.body);
 
+    _walletState = await isWalletInitialized(body["token"]);
+
     if (_user == null) {
-      bool walletIsInitialized = await isWalletInitialized(body["token"]);
+      bool walletIsInitialized =
+          _walletState == WalletState.notInitialized ? false : true;
       _user = User(body["user"]['id'], body["user"]['username'], body["token"],
           walletIsInitialized);
     } else {
@@ -168,7 +177,7 @@ class AuthHelper {
     _streamController.add(_authState);
   }
 
-  Future<bool> isWalletInitialized(String token) async {
+  Future<WalletState> isWalletInitialized(String token) async {
     var json = jsonEncode({"query": getInfoQuery});
     var authToken = "JWT $token";
     http.Response response = await http.post(_gql,
@@ -181,18 +190,20 @@ class AuthHelper {
     if (response.statusCode == 200) {
       var json = jsonDecode(response.body);
       var typename = json["data"]["lnGetInfo"]["__typename"];
-      if (typename == "GetInfoSuccess")
-        return true;
-      else if (typename == "WalletInstanceNotFound")
-        return false;
-      else if (typename == "ServerError") return false;
-
-      return true;
+      switch (typename) {
+        case "GetInfoSuccess":
+          return WalletState.ready;
+        case "WalletInstanceNotRunning":
+          return WalletState.notRunning;
+        case "WalletInstanceNotFound":
+          return WalletState.notInitialized;
+        default:
+          return WalletState.unknown;
+      }
     } else {
       print("Error while fetching first get info object");
+      return WalletState.unknown;
     }
-
-    return false;
   }
 
   // Singleton stuff

@@ -145,3 +145,49 @@ String listPeersQuery = """
   }
 }
 """;
+
+String startDaemon = """
+mutation sd(\$walletPassword: String!) {
+  startDaemon(walletPassword: \$walletPassword) {
+    __typename
+    ... on StartDaemonSuccess {
+      info {
+        identityPubkey
+        alias
+        numPendingChannels
+        numActiveChannels
+        numPeers
+        blockHeight
+        blockHash
+        syncedToChain
+        testnet
+        chains
+        uris
+        bestHeaderTimestamp
+        version
+      }
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on StartDaemonInstanceIsAlreadyRunning {
+      errorMessage
+      suggestions
+    }
+  }
+}
+""";
+
+String stopDaemon = """
+mutation StopDaemon {
+  lnStopDaemon {
+    __typename
+    ... on ServerError {
+      errorMessage
+    }
+    ... on StopDaemonError{
+      errorMessage
+    }
+  }
+}
+""";
