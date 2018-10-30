@@ -31,6 +31,10 @@ class LnInfoType {
   int bestHeaderTimestamp;
   //The version of the LND software that the node is running.
   String version;
+  // Current IP the node is reachable from
+  String currentIp;
+  // Current port the node is reachable from
+  int currentPort;
 
   LnInfoType(Map<String, dynamic> data) {
     identityPubkey = data["identityPubkey"];
@@ -46,5 +50,7 @@ class LnInfoType {
     uris = List<String>.from(data["uris"] ?? []);
     bestHeaderTimestamp = data["bestHeaderTimestamp"];
     version = data["version"];
+    currentIp = data["currentIp"];
+    currentPort = data["currentPort"];
   }
 }

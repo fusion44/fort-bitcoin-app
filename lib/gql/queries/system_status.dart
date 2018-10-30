@@ -10,6 +10,8 @@ String getInfoQuery = """
     __typename
     ... on GetInfoSuccess {
       lnInfo {
+        currentIp
+        currentPort
         identityPubkey
         alias
         numPendingChannels
