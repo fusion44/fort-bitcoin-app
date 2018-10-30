@@ -10,20 +10,24 @@ class ShowStringQr extends StatelessWidget {
   const ShowStringQr(this._value, [this._description = ""]);
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    double width = MediaQuery.of(context).size.width;
+    double width65Percent = width * 0.65;
+
+    return Column(
       children: <Widget>[
         Container(
+          width: width65Percent,
           color: Colors.white,
           child: Center(
             child: QrImage(
-              padding: EdgeInsets.all(25.0),
+              padding: EdgeInsets.all(10.0),
               version: 10,
               data: _value,
             ),
           ),
         ),
         Padding(
-            padding: EdgeInsets.only(top: 25.0),
+            padding: EdgeInsets.only(top: 15.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
