@@ -14,7 +14,7 @@ import 'package:mobile_app/pages/splash.dart';
 // and are switched via drawer or bottom nav bar
 enum DrawerPages { finance, connectivity, stats, manage_wallet }
 enum BottomNavbarPagesFin { balance, send, receive }
-enum BottomNavbarPagesConn { channels, peers }
+enum BottomNavbarPagesConn { channels, peers, node_info }
 
 final routes = {
   "/home": (BuildContext context) => new HomePage(),
