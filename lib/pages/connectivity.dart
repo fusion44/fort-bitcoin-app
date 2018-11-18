@@ -10,6 +10,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/blocs/channels_bloc.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/blocs/node_info_bloc.dart';
+import 'package:mobile_app/blocs/open_channel/open_channel_bloc.dart';
 import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/pages/channels.dart';
 import 'package:mobile_app/pages/node_info.dart';
@@ -28,6 +29,7 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
   PeerBloc _peersBloc;
   ChannelBloc _channelBloc;
   NodeInfoBloc _nodeInfoBloc;
+  OpenChannelBloc _openChannelBloc;
 
   int _bottomNavbarIndex = 0;
   BottomNavbarPagesConn _page = BottomNavbarPagesConn.channels;
@@ -56,6 +58,9 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
     }
     if (_nodeInfoBloc == null) {
       _nodeInfoBloc = NodeInfoBloc(_client);
+    }
+    if (_openChannelBloc == null) {
+      _openChannelBloc = OpenChannelBloc();
     }
   }
 
@@ -95,19 +100,22 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
         body = Center(child: Text("implement me $_page"));
     }
 
-    return BlocProvider<PeerBloc>(
-      bloc: _peersBloc,
-      child: BlocProvider<ChannelBloc>(
-        bloc: _channelBloc,
-        child: BlocProvider(
-          bloc: _nodeInfoBloc,
-          child: Scaffold(
-            resizeToAvoidBottomPadding: false,
-            body: body,
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: _bottomNavbarIndex,
-              onTap: nav,
-              items: navItems,
+    return BlocProvider<OpenChannelBloc>(
+      bloc: _openChannelBloc,
+      child: BlocProvider<PeerBloc>(
+        bloc: _peersBloc,
+        child: BlocProvider<ChannelBloc>(
+          bloc: _channelBloc,
+          child: BlocProvider(
+            bloc: _nodeInfoBloc,
+            child: Scaffold(
+              resizeToAvoidBottomPadding: false,
+              body: body,
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: _bottomNavbarIndex,
+                onTap: nav,
+                items: navItems,
+              ),
             ),
           ),
         ),

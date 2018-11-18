@@ -5,7 +5,11 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/blocs/open_channel/open_channel_bloc.dart';
+import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/gql/types/lnpeer.dart';
+import 'package:mobile_app/pages/open_channel.dart';
 
 import 'package:mobile_app/widgets/simple_data_row.dart';
 
@@ -25,9 +29,14 @@ class PeerDisplay extends StatefulWidget {
 }
 
 class _PeerDisplayState extends State<PeerDisplay> {
+  OpenChannelBloc _openChannelBloc;
+  PeerBloc _peerBloc;
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
+    _openChannelBloc = BlocProvider.of<OpenChannelBloc>(context);
+    _peerBloc = BlocProvider.of<PeerBloc>(context);
 
     return Card(
       child: Row(
@@ -53,6 +62,7 @@ class _PeerDisplayState extends State<PeerDisplay> {
                         List<_Choice> _choices = <_Choice>[
                           _Choice(widget._data, 'Disconnect'),
                           _Choice(widget._data, 'Locate'),
+                          _Choice(widget._data, 'Open Channel'),
                         ];
                         return _choices.map(
                           (_Choice choice) {
@@ -104,6 +114,27 @@ class _PeerDisplayState extends State<PeerDisplay> {
       case "Locate":
         Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text("Not yet implemented!")));
+        break;
+      case "Open Channel":
+        if (value.peer.hasChannel) {
+          Scaffold.of(context).showSnackBar(
+              SnackBar(content: Text("Peer already has an open channel!")));
+          break;
+        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BlocProvider<PeerBloc>(
+                  bloc: _peerBloc,
+                  child: BlocProvider<OpenChannelBloc>(
+                    bloc: _openChannelBloc,
+                    child: OpenChannelPage(
+                      peer: value.peer,
+                    ),
+                  ),
+                ),
+          ),
+        );
         break;
       default:
     }
