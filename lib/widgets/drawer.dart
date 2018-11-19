@@ -25,24 +25,17 @@ class FortBtcDrawerState extends State<FortBtcDrawer> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     Widget drawerHeader = UserAccountsDrawerHeader(
-        accountEmail: Text("fake@email.com"),
-        accountName: Text(
-          "My username",
-          style: theme.textTheme.title,
-        ),
-        onDetailsPressed: () {
-          setState(() {
-            _showDetails = !_showDetails;
-          });
-        },
-        currentAccountPicture: CircleAvatar(
-          backgroundImage: NetworkImage("http://i.pravatar.cc/300"),
-        ),
-        decoration: BoxDecoration(
-            image: DecorationImage(
-                fit: BoxFit.fill,
-                image: NetworkImage(
-                    "https://placeimg.com/640/480/arch/grayscale"))));
+      accountEmail: Text(""),
+      accountName: Text(
+        AuthHelper().user.name,
+        style: theme.textTheme.title,
+      ),
+      onDetailsPressed: () {
+        setState(() {
+          _showDetails = !_showDetails;
+        });
+      },
+    );
 
     ListView list;
 
