@@ -25,15 +25,15 @@ void main() async {
 class FortBitcoinApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    StreamBuilder<AuthState> builder = StreamBuilder(
-      initialData: AuthState.loggingIn,
+    StreamBuilder<AuthData> builder = StreamBuilder(
+      initialData: AuthData.initial(),
       stream: AuthHelper().eventStream,
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.hasError) {
           return new Center(child: Text("error"));
         }
         if (asyncSnapshot.hasData) {
-          switch (asyncSnapshot.data) {
+          switch (asyncSnapshot.data.state) {
             case AuthState.loggingIn:
               return MaterialApp(
                 title: 'Fort Bitcoin',
@@ -48,7 +48,7 @@ class FortBitcoinApp extends StatelessWidget {
               return MaterialApp(
                 title: "Fort Bitcoin",
                 theme: ThemeData.dark(),
-                home: SignupPage(),
+                home: SignupPage(errorMessage: asyncSnapshot.data.message),
               );
             default:
               return Center(child: Text("Implement me ${asyncSnapshot.data}"));

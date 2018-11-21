@@ -24,6 +24,24 @@ enum AuthState {
   loginError,
 }
 
+class AuthData {
+  // The new state
+  final AuthState state;
+
+  // An optional status message to this new state.
+  // Can contain errors
+  final String message;
+
+  // Current user object if logged in
+  final User user;
+
+  AuthData(this.state, [this.message = "", this.user]);
+
+  static initial() {
+    return AuthData(AuthState.loggingIn);
+  }
+}
+
 /*
 Singleton class that helps managing user authentication.
 */
@@ -44,8 +62,8 @@ class AuthHelper {
   String _lastError;
   String get lastError => _lastError;
 
-  StreamController<AuthState> _streamController = StreamController.broadcast();
-  Stream<AuthState> get eventStream => _streamController.stream;
+  StreamController<AuthData> _streamController = StreamController.broadcast();
+  Stream<AuthData> get eventStream => _streamController.stream;
 
   bool _isInitialized = false;
 
@@ -100,7 +118,13 @@ class AuthHelper {
         // Wohoo! Registered, now get the login token
         return login(username, password);
       } else {
-        print("Error while registering");
+        String error;
+        if (response.statusCode == 400) {
+          error = "Username or password incorrect";
+        } else if (response.statusCode == 404) {
+          error = response.body;
+        }
+        _reset(AuthState.loggedOut, error: error).then((onValue) => _authState);
       }
     }).catchError((onError) {
       print(onError);
@@ -115,8 +139,14 @@ class AuthHelper {
         .post(_authApi,
             headers: {"Content-Type": "application/json"}, body: json)
         .then((response) {
-      if (response.statusCode == 400) {
-        _reset(AuthState.loggedOut).then((onValue) => _authState);
+      if (response.statusCode != 200) {
+        String error;
+        if (response.statusCode == 400) {
+          error = "Username or password incorrect";
+        } else if (response.statusCode == 404) {
+          error = response.body;
+        }
+        _reset(AuthState.loggedOut, error: error).then((onValue) => _authState);
       } else {
         _successfulLogin(response).then((onValue) => _authState);
       }
@@ -161,20 +191,16 @@ class AuthHelper {
 
   Future _reset(AuthState state, {String error = ""}) async {
     _user = User.empty();
-    _setState(state);
+    _setState(state, error, _user);
     _lastError = error;
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("authenticated", false);
-    await prefs.setInt("auth_id", _user.id);
-    await prefs.setString('auth_token', _user.token);
-    await prefs.setString('auth_username', _user.name);
-    await prefs.setBool("wallet_is_initialized", _user.walletIsInitialized);
+    await prefs.clear();
   }
 
-  void _setState(AuthState newState) {
+  void _setState(AuthState newState, [String message = "", User user]) {
     _authState = newState;
-    _streamController.add(_authState);
+    _streamController.add(AuthData(newState, message, user));
   }
 
   Future<WalletState> isWalletInitialized(String token) async {
