@@ -14,7 +14,7 @@ import 'package:mobile_app/gql/types/lnsendpayresult.dart';
 import 'package:mobile_app/models.dart';
 import 'package:mobile_app/widgets/scale_in_animated_icon.dart';
 import 'package:mobile_app/widgets/show_decoded_pay.dart';
-import 'package:qrcode_reader/QRCodeReader.dart';
+import 'package:qrcode_reader/qrcode_reader.dart';
 
 class SendPage extends StatefulWidget {
   static IconData icon = Icons.send;

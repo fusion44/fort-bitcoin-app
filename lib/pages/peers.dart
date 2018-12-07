@@ -13,7 +13,7 @@ import 'package:mobile_app/gql/types/lnpeer.dart';
 import 'package:mobile_app/widgets/connect_peer_confirm.dart';
 import 'package:mobile_app/widgets/peer_display.dart';
 import 'package:mobile_app/widgets/scale_in_animated_icon.dart';
-import 'package:qrcode_reader/QRCodeReader.dart';
+import 'package:qrcode_reader/qrcode_reader.dart';
 import 'package:unicorndial/unicorndial.dart';
 
 class PeersPage extends StatefulWidget {

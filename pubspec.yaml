@@ -17,8 +17,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   graphql_flutter: 1.0.0-alpha.11
-  qrcode_reader:
-   git: git://github.com/bcko/flutter_qrcode_reader.git
+  qrcode_reader: ^0.4.4
   qr_flutter: ^1.1.3 
   html: any
   shared_preferences: 0.4.3
