@@ -36,6 +36,13 @@ class ChannelState {
     @required this.channels,
   });
 
+  getChannelById(String chanId) {
+    for (LnChannel channel in channels) {
+      if (channel.chanId == chanId) return channel;
+    }
+    return null;
+  }
+
   factory ChannelState.initial() {
     return ChannelState(
       type: ChannelEventType.initial,

@@ -38,6 +38,13 @@ class PeerState {
     @required this.peers,
   });
 
+  getPeerById(String pubKey) {
+    for (LnPeer peer in peers) {
+      if (peer.pubKey == pubKey) return peer;
+    }
+    return null;
+  }
+
   factory PeerState.initial() {
     return PeerState(
       type: PeerEventType.initial,
