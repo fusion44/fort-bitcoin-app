@@ -5,9 +5,14 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/authhelper.dart';
+import 'package:mobile_app/blocs/channels_bloc.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
+import 'package:mobile_app/blocs/node_info_bloc.dart';
+import 'package:mobile_app/blocs/open_channel/open_channel_bloc.dart';
+import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/config.dart';
 import 'package:mobile_app/pages/home.dart';
 import 'package:mobile_app/pages/setup_wallet.dart';
@@ -68,12 +73,9 @@ GraphQLProvider _buildGraphQLProvider() {
       'Authorization': 'JWT ${AuthHelper().user.token}',
     },
   );
-
-  ValueNotifier<GraphQLClient> client = ValueNotifier(
-    GraphQLClient(
-      cache: InMemoryCache(),
-      link: link,
-    ),
+  GraphQLClient gqlCLient = GraphQLClient(
+    cache: InMemoryCache(),
+    link: link,
   );
 
   Widget page;
@@ -87,8 +89,26 @@ GraphQLProvider _buildGraphQLProvider() {
   }
 
   return GraphQLProvider(
-    client: client,
+    client: ValueNotifier(gqlCLient),
     child: MaterialApp(
+      builder: (BuildContext context, Widget child) {
+        var channelBloc = ChannelBloc(gqlCLient);
+        var openChannelBloc = OpenChannelBloc();
+        var peersBloc = PeerBloc(gqlCLient);
+        var nodeInfoBloc = NodeInfoBloc(gqlCLient);
+
+        return BlocProvider<ChannelBloc>(
+          bloc: channelBloc,
+          child: BlocProvider<OpenChannelBloc>(
+            bloc: openChannelBloc,
+            child: BlocProvider<PeerBloc>(
+              bloc: peersBloc,
+              child:
+                  BlocProvider<NodeInfoBloc>(bloc: nodeInfoBloc, child: child),
+            ),
+          ),
+        );
+      },
       title: 'Fort Bitcoin',
       theme: ThemeData.dark(),
       home: page,

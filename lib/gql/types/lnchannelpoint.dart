@@ -5,8 +5,21 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 class LnChannelPoint {
-  final String fundingTxId;
-  final int outputIndex;
+  String fundingTxId;
+  int outputIndex;
 
   LnChannelPoint(this.fundingTxId, this.outputIndex);
+
+  LnChannelPoint.fromEncodedString(String channelPoint) {
+    List<String> split = channelPoint.split(":");
+    this.fundingTxId = split[0];
+    this.outputIndex = int.tryParse(split[1]);
+  }
+
+  toJSON() {
+    return {
+      "fundingTxidStr": this.fundingTxId,
+      "outputIndex": this.outputIndex
+    };
+  }
 }

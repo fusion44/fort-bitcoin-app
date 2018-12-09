@@ -6,6 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app/gql/types/lnchannel.dart';
+import 'package:mobile_app/pages/channel_detail.dart';
 
 import 'package:mobile_app/widgets/channel_balance.dart';
 import 'package:mobile_app/widgets/simple_data_row.dart';
@@ -20,56 +21,67 @@ class ChannelDisplay extends StatelessWidget {
 
     var blockHeight = int.parse(_data.chanId) >> 40;
 
-    return Card(
-      child: Row(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              width: 5.0,
-              height: 150.0,
-              color: Colors.green,
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) =>
+                ChannelDetail(chanId: this._data.chanId),
           ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  "ID: ${_data.chanId}",
-                  style: theme.textTheme.headline,
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(child: Text("Local Balance")),
-                    Expanded(
-                      child: Text(
-                        "Remote Balance",
-                        textAlign: TextAlign.right,
-                      ),
-                    )
-                  ],
-                ),
-                ChannelBalanceWidget(_data.localBalance, _data.remoteBalance),
-                SimpleDataRow(left: "Capacity", right: _data.capacity),
-                SimpleDataRow(left: "Established", right: blockHeight),
-                SimpleDataRow(left: "Sent", right: _data.totalSatoshisSent),
-                SimpleDataRow(
-                  left: "Received",
-                  right: _data.totalSatoshisReceived,
-                ),
-                SimpleDataRow(
-                  left: "Unsettled",
-                  right: _data.unsettledBalance,
-                ),
-                SimpleDataRow(left: "Updates", right: _data.numUpdates)
-              ],
+        );
+      },
+      child: Card(
+        child: Row(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Container(
+                width: 5.0,
+                height: 150.0,
+                color: Colors.green,
+              ),
             ),
-          ),
-          Container(
-            width: 8.0,
-          )
-        ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    "ID: ${_data.chanId}",
+                    style: theme.textTheme.headline,
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Expanded(child: Text("Local Balance")),
+                      Expanded(
+                        child: Text(
+                          "Remote Balance",
+                          textAlign: TextAlign.right,
+                        ),
+                      )
+                    ],
+                  ),
+                  ChannelBalanceWidget(_data.localBalance, _data.remoteBalance),
+                  SimpleDataRow(left: "Capacity", right: _data.capacity),
+                  SimpleDataRow(left: "Established", right: blockHeight),
+                  SimpleDataRow(left: "Sent", right: _data.totalSatoshisSent),
+                  SimpleDataRow(
+                    left: "Received",
+                    right: _data.totalSatoshisReceived,
+                  ),
+                  SimpleDataRow(
+                    left: "Unsettled",
+                    right: _data.unsettledBalance,
+                  ),
+                  SimpleDataRow(left: "Updates", right: _data.numUpdates)
+                ],
+              ),
+            ),
+            Container(
+              width: 8.0,
+            )
+          ],
+        ),
       ),
     );
   }

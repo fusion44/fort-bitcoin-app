@@ -5,13 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/blocs/channels_bloc.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
-import 'package:mobile_app/blocs/node_info_bloc.dart';
-import 'package:mobile_app/blocs/open_channel/open_channel_bloc.dart';
-import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/pages/channels.dart';
 import 'package:mobile_app/pages/node_info.dart';
 import 'package:mobile_app/pages/peers.dart';
@@ -26,11 +20,6 @@ class ConnectivityPage extends StatefulWidget {
 }
 
 class _ConnectivityPageState extends State<ConnectivityPage> {
-  PeerBloc _peersBloc;
-  ChannelBloc _channelBloc;
-  NodeInfoBloc _nodeInfoBloc;
-  OpenChannelBloc _openChannelBloc;
-
   int _bottomNavbarIndex = 0;
   BottomNavbarPagesConn _page = BottomNavbarPagesConn.channels;
   List<BottomNavigationBarItem> navItems = [
@@ -41,28 +30,6 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
     BottomNavigationBarItem(
         title: const Text("Info"), icon: const Icon(Icons.info)),
   ];
-
-  GraphQLClient _client;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_client == null) {
-      _client = GraphQLProvider.of(context).value;
-    }
-    if (_peersBloc == null) {
-      _peersBloc = PeerBloc(_client);
-    }
-    if (_channelBloc == null) {
-      _channelBloc = ChannelBloc(_client);
-    }
-    if (_nodeInfoBloc == null) {
-      _nodeInfoBloc = NodeInfoBloc(_client);
-    }
-    if (_openChannelBloc == null) {
-      _openChannelBloc = OpenChannelBloc();
-    }
-  }
 
   void nav(int index) {
     setState(() {
@@ -100,25 +67,13 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
         body = Center(child: Text("implement me $_page"));
     }
 
-    return BlocProvider<OpenChannelBloc>(
-      bloc: _openChannelBloc,
-      child: BlocProvider<PeerBloc>(
-        bloc: _peersBloc,
-        child: BlocProvider<ChannelBloc>(
-          bloc: _channelBloc,
-          child: BlocProvider(
-            bloc: _nodeInfoBloc,
-            child: Scaffold(
-              resizeToAvoidBottomPadding: false,
-              body: body,
-              bottomNavigationBar: BottomNavigationBar(
-                currentIndex: _bottomNavbarIndex,
-                onTap: nav,
-                items: navItems,
-              ),
-            ),
-          ),
-        ),
+    return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      body: body,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _bottomNavbarIndex,
+        onTap: nav,
+        items: navItems,
       ),
     );
   }

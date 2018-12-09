@@ -4,6 +4,29 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+String closeChannelSubscription = """
+subscription CloseChannelSub(\$fundingTxid: String!, \$outputIndex: Int!, \$force: Boolean, 
+                             \$targetConf: Int, \$satPerByte: Int) {
+  closeChannelSubscription(fundingTxid: \$fundingTxid, outputIndex: \$outputIndex, force: \$force, 
+                           targetConf: \$targetConf, satPerByte: \$satPerByte) {
+    __typename
+    ... on ChannelClosePendingUpdate {
+      txid
+    }
+    ... on ChannelCloseUpdate {
+      closingTxid
+      success
+    }
+    ... on CloseChannelError {
+      errorMessage
+    }
+    ... on ServerError {
+      errorMessage
+    }
+  }
+}
+""";
+
 String openChannelSubscription = """
 subscription OpenChannelSub(\$nodePubkey: String, \$localFundingAmount: Int, \$pushSat: Int, 
 \$targetConf: Int, \$satPerByte: Int, \$private: Boolean, \$minHtlcMsat: Int, 

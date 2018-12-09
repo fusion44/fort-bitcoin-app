@@ -4,12 +4,13 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+import 'package:mobile_app/gql/types/lnchannelpoint.dart';
 import 'package:mobile_app/gql/types/lnhtlc.dart';
 
 class LnChannel {
   bool active;
   String remotePubkey;
-  String channelPoint;
+  LnChannelPoint channelPoint;
   String chanId;
   int capacity;
   int localBalance;
@@ -28,7 +29,7 @@ class LnChannel {
   LnChannel(Map<String, dynamic> data) {
     active = data["active"];
     remotePubkey = data["remotePubkey"];
-    channelPoint = data["channelPoint"];
+    channelPoint = LnChannelPoint.fromEncodedString(data["channelPoint"]);
     chanId = data["chanId"];
     capacity = data["capacity"];
     localBalance = data["localBalance"];
