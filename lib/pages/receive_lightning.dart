@@ -202,102 +202,106 @@ class _ReceiveLightningPageState extends State<ReceiveLightningPage> {
   }
 
   Widget getInvoiceForm(ThemeData theme) {
-    return Form(
-      key: _formKey,
-      child: Padding(
-        padding: EdgeInsets.all(40.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              "Add Invoice",
-              style: theme.textTheme.display3,
-            ),
-            TextFormField(
-                autofocus: true,
-                controller: _valueController,
-                decoration: InputDecoration(labelText: 'Invoice value in sats'),
-                keyboardType: TextInputType.numberWithOptions(
-                    decimal: false, signed: false),
-                validator: (value) {
-                  int sats = int.tryParse(value);
+    return SingleChildScrollView(
+      child: Form(
+        key: _formKey,
+        child: Padding(
+          padding: EdgeInsets.all(40.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                "Add Invoice",
+                style: theme.textTheme.display3,
+              ),
+              TextFormField(
+                  autofocus: true,
+                  controller: _valueController,
+                  decoration:
+                      InputDecoration(labelText: 'Invoice value in sats'),
+                  keyboardType: TextInputType.numberWithOptions(
+                      decimal: false, signed: false),
+                  validator: (value) {
+                    int sats = int.tryParse(value);
 
-                  if (sats == null || sats <= 0) {
-                    return "Must be more than 0";
-                  }
-                }),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Optional memo'),
-              controller: _memoController,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: RaisedButton(
-                onPressed: () {
-                  if (_formKey.currentState.validate()) {
-                    var v = {
-                      "value": int.tryParse(_valueController.value.text),
-                      "memo": _memoController.value.text,
-                    };
+                    if (sats == null || sats <= 0) {
+                      return "Must be more than 0";
+                    }
+                  }),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Optional memo'),
+                controller: _memoController,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: RaisedButton(
+                  onPressed: () {
+                    if (_formKey.currentState.validate()) {
+                      var v = {
+                        "value": int.tryParse(_valueController.value.text),
+                        "memo": _memoController.value.text,
+                      };
 
-                    _client
-                        .query(QueryOptions(document: addInvoice, variables: v))
-                        .then((data) {
-                      String typename =
-                          data.data["lnAddInvoice"]["result"]["__typename"];
-                      switch (typename) {
-                        case "AddInvoiceSuccess":
-                          LnAddInvoiceResponse resp = LnAddInvoiceResponse(
-                              data.data["lnAddInvoice"]["result"]["invoice"]);
-                          print(resp.paymentRequest);
-                          setState(() {
-                            _showFAB = false;
-                            _invoice = resp;
-                            _currentState = _PageStates.awaiting_settlement;
-                          });
-                          break;
-                        case "AddInvoiceError":
-                          setState(() {
-                            _showFAB = true;
-                            _errorText = data.data["lnAddInvoice"]["result"]
-                                ["paymentError"];
-                            _currentState = _PageStates.show_error;
-                          });
-                          break;
-                        case "ServerError":
-                          setState(() {
-                            _showFAB = true;
-                            _errorText = data.data["lnAddInvoice"]["result"]
-                                ["errorMessage"];
-                            _currentState = _PageStates.show_error;
-                          });
-                          break;
-                        default:
-                          setState(() {
-                            _showFAB = true;
-                            _errorText = "Not implemented: $typename";
-                            _currentState = _PageStates.show_error;
-                          });
-                      }
-                    }).catchError((error) {
-                      print(error);
+                      _client
+                          .query(
+                              QueryOptions(document: addInvoice, variables: v))
+                          .then((data) {
+                        String typename =
+                            data.data["lnAddInvoice"]["result"]["__typename"];
+                        switch (typename) {
+                          case "AddInvoiceSuccess":
+                            LnAddInvoiceResponse resp = LnAddInvoiceResponse(
+                                data.data["lnAddInvoice"]["result"]["invoice"]);
+                            print(resp.paymentRequest);
+                            setState(() {
+                              _showFAB = false;
+                              _invoice = resp;
+                              _currentState = _PageStates.awaiting_settlement;
+                            });
+                            break;
+                          case "AddInvoiceError":
+                            setState(() {
+                              _showFAB = true;
+                              _errorText = data.data["lnAddInvoice"]["result"]
+                                  ["paymentError"];
+                              _currentState = _PageStates.show_error;
+                            });
+                            break;
+                          case "ServerError":
+                            setState(() {
+                              _showFAB = true;
+                              _errorText = data.data["lnAddInvoice"]["result"]
+                                  ["errorMessage"];
+                              _currentState = _PageStates.show_error;
+                            });
+                            break;
+                          default:
+                            setState(() {
+                              _showFAB = true;
+                              _errorText = "Not implemented: $typename";
+                              _currentState = _PageStates.show_error;
+                            });
+                        }
+                      }).catchError((error) {
+                        print(error);
+                        setState(() {
+                          _showFAB = true;
+                          _errorText = error.toString();
+                          _currentState = _PageStates.show_error;
+                        });
+                      });
+
                       setState(() {
                         _showFAB = true;
-                        _errorText = error.toString();
-                        _currentState = _PageStates.show_error;
+                        _currentState = _PageStates.awaiting_new_invoice;
                       });
-                    });
-
-                    setState(() {
-                      _showFAB = true;
-                      _currentState = _PageStates.awaiting_new_invoice;
-                    });
-                  }
-                },
-                child: Text('Create Invoice'),
+                    }
+                  },
+                  child: Text('Create Invoice'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
