@@ -55,8 +55,17 @@ class _ChannelDetailState extends State<ChannelDetail> {
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: <Widget>[
-                      ChannelDisplay(chan),
-                      PeerDisplay(peer, null),
+                      ChannelDisplay(chan, peer),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: peer == null
+                            ? Text(
+                                "This peer appears to be offline.",
+                                style: theme.textTheme.body1
+                                    .apply(color: Colors.redAccent),
+                              )
+                            : PeerDisplay(peer, null),
+                      ),
                     ],
                   ),
                 ),

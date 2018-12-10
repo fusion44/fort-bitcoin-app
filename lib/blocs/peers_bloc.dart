@@ -38,7 +38,7 @@ class PeerState {
     @required this.peers,
   });
 
-  getPeerById(String pubKey) {
+  LnPeer getPeerById(String pubKey) {
     for (LnPeer peer in peers) {
       if (peer.pubKey == pubKey) return peer;
     }

@@ -6,6 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app/gql/types/lnchannel.dart';
+import 'package:mobile_app/gql/types/lnpeer.dart';
 import 'package:mobile_app/pages/channel_detail.dart';
 
 import 'package:mobile_app/widgets/channel_balance.dart';
@@ -13,7 +14,8 @@ import 'package:mobile_app/widgets/simple_data_row.dart';
 
 class ChannelDisplay extends StatelessWidget {
   final LnChannel _data;
-  ChannelDisplay(this._data);
+  final LnPeer _peer;
+  ChannelDisplay(this._data, this._peer);
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,7 @@ class ChannelDisplay extends StatelessWidget {
               child: Container(
                 width: 5.0,
                 height: 150.0,
-                color: Colors.green,
+                color: this._peer == null ? Colors.red : Colors.green,
               ),
             ),
             Expanded(
