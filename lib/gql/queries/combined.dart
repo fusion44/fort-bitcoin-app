@@ -6,6 +6,32 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 String getLightningFinanceInfo = """
 query getLightningFinanceInfo {
+  lnListInvoices(numMaxInvoices: 7) {
+    __typename
+    ... on ListInvoicesSuccess {
+      invoices {
+        memo
+        receipt
+        value
+        settled
+        creationDate
+        settleDate
+        expiry
+        addIndex
+        addIndex
+        settleIndex
+        amtPaid
+      }
+      lastIndexOffset
+      firstIndexOffset
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on ListInvoicesError {
+      errorMessage
+    }
+  }
   lnListPayments {
     __typename
     ... on ListPaymentsSuccess {

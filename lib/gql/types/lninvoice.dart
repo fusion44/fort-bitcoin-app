@@ -13,8 +13,8 @@ class LnInvoice {
   String rHash;
   int value;
   bool settled;
-  int creationDate;
-  int settleDate;
+  DateTime creationDate;
+  DateTime settleDate;
   String paymentRequest;
   String descriptionHash;
   int expiry;
@@ -32,8 +32,10 @@ class LnInvoice {
     rHash = data["rHash"] ?? "";
     value = data["value"];
     settled = data["settled"];
-    creationDate = data["creationDate"];
-    settleDate = data["settleDate"];
+    creationDate =
+        DateTime.fromMillisecondsSinceEpoch(data["creationDate"] * 1000 ?? 0);
+    settleDate =
+        DateTime.fromMillisecondsSinceEpoch(data["settleDate"] * 1000 ?? 0);
     paymentRequest = data["paymentRequest"] ?? "";
     descriptionHash = data["descriptionHash"] ?? "";
     expiry = data["expiry"];

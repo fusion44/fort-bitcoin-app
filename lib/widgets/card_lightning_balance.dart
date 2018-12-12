@@ -5,10 +5,12 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/gql/types/lnchannelbalance.dart';
+import 'package:mobile_app/gql/types/lninvoice.dart';
 import 'package:mobile_app/gql/types/lnpayment.dart';
 import 'package:mobile_app/gql/utils.dart';
 import 'package:mobile_app/models.dart';
@@ -32,7 +34,14 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
   final String _fetchBalanceErrorkey = "fetch_chan_balance_error";
   bool _loading = true;
   LnChannelBalance _balanceData;
-  List<LnPayment> _txData = [];
+  // int = unix time of transfer
+  // dynamic = LnPayment or LnInvoice
+  SplayTreeMap<int, dynamic> _transactionData = SplayTreeMap((int a, int b) {
+    // Sort newest to oldest
+    if (a > b) return -1;
+    if (a == b) return 0;
+    return 1;
+  });
   GraphQLClient _client;
   Map<String, DataFetchError> _errorMessages = Map();
   String _header;
@@ -73,15 +82,31 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
           .query(QueryOptions(document: combi_queries.getLightningFinanceInfo));
 
       if (this.mounted) {
+        Map listInvoices = responses.data["lnListInvoices"];
         Map listPayments = responses.data["lnListPayments"];
         Map channelBalance = responses.data["lnGetChannelBalance"];
 
+        _transactionData.clear();
+        if (listInvoices["__typename"] == "ListInvoicesSuccess") {
+          for (var invoice in listInvoices["invoices"]) {
+            if (invoice["settled"]) {
+              _transactionData[invoice["creationDate"]] = LnInvoice(invoice);
+            }
+          }
+        } else if (listInvoices["__typename"] == "ServerError" ||
+            listInvoices["__typename" == "ListInvoicesError"]) {
+          var error = DataFetchError(
+              -1, listInvoices["errorMessage"], _fetchPaymentsErrorkey);
+          _errorMessages[_fetchPaymentsErrorkey] = error;
+          print("Error fetching payments: ${error.message}");
+        }
+
         // preprocess payments data
-        _txData.clear();
         if (listPayments["__typename"] == "ListPaymentsSuccess") {
           List payments = listPayments["lnTransactionDetails"]["payments"];
           for (var tx in payments) {
-            _txData.add(LnPayment(tx));
+            LnPayment payment = LnPayment(tx);
+            _transactionData[tx["creationDate"]] = payment;
           }
         } else if (channelBalance["__typename"] == "WalletInstanceNotFound") {
           onWalletNotFound();
@@ -92,10 +117,6 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
           _errorMessages[_fetchPaymentsErrorkey] = error;
           print("Error fetching payments: ${error.message}");
         }
-        // Sort all payments by creation date so the newest
-        // payment is shown first
-        _txData.sort((first, second) =>
-            second.creationDate.compareTo(first.creationDate));
 
         if (channelBalance["__typename"] == "GetChannelBalanceSuccess") {
           _balanceData = LnChannelBalance(channelBalance["lnChannelBalance"]);
@@ -114,7 +135,7 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
           _errorMessages = _errorMessages;
           _loading = false;
           _balanceData = _balanceData;
-          _txData = _txData;
+          _transactionData = _transactionData;
         });
       }
     } on TypeError catch (error) {
@@ -145,27 +166,54 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
     children.add(Padding(
         padding: EdgeInsets.only(bottom: 10.0),
         child: BalanceDisplayLightning(_balanceData, widget._testnet)));
-    if (_txData.length == 0) {
+    if (_transactionData.length == 0) {
       children.add(Text("No payments yet"));
     } else {
-      int maxRange = _txData.length > 5 ? 5 : _txData.length;
-      for (LnPayment p in _txData.getRange(0, maxRange)) {
-        String dt = formatDate(p.creationDate, [M, "-", dd, " ", hh, ":", nn]);
-        children.add(Row(
-          children: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(right: 5.0),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Colors.red,
-                )),
-            Padding(padding: EdgeInsets.only(right: 5.0), child: Text(dt)),
-            Padding(
-                padding: EdgeInsets.only(right: 5.0),
-                child: Text("${p.value} $unit")),
-            Text("TODO: paym. comment")
-          ],
-        ));
+      int maxRange =
+          _transactionData.length > 10 ? 10 : _transactionData.length;
+      var range = _transactionData.values.toList().getRange(0, maxRange);
+      for (dynamic value in range) {
+        if (value is LnInvoice) {
+          LnInvoice invoice = value;
+          String dt =
+              formatDate(invoice.creationDate, [M, "-", dd, " ", hh, ":", nn]);
+
+          children.add(Row(
+            children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.only(right: 5.0),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    color: Colors.green,
+                  )),
+              Padding(padding: EdgeInsets.only(right: 5.0), child: Text(dt)),
+              Padding(
+                  padding: EdgeInsets.only(right: 5.0),
+                  child: Text("${invoice.value} $unit")),
+              Text(invoice.memo)
+            ],
+          ));
+        } else {
+          LnPayment payment = value;
+          String dt =
+              formatDate(payment.creationDate, [M, "-", dd, " ", hh, ":", nn]);
+
+          children.add(Row(
+            children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.only(right: 5.0),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: Colors.red,
+                  )),
+              Padding(padding: EdgeInsets.only(right: 5.0), child: Text(dt)),
+              Padding(
+                  padding: EdgeInsets.only(right: 5.0),
+                  child: Text("-${payment.value} $unit")),
+              Text("TODO: paym. comment")
+            ],
+          ));
+        }
       }
     }
     return CardBase(_header, Column(children: children), _loading);

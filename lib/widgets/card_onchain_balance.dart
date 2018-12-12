@@ -151,7 +151,8 @@ class CardOnchainBalanceState extends State<CardOnchainBalance> {
     if (_txData.length == 0) {
       children.add(Text("No transactions yet"));
     } else {
-      for (LnTransaction p in _txData.getRange(0, 5)) {
+      int max = _txData.length > 10 ? 10 : _txData.length;
+      for (LnTransaction p in _txData.getRange(0, max)) {
         String dt = formatDate(p.timeStamp, [M, "-", dd, " ", hh, ":", nn]);
         IconData ic = p.amount > 0 ? Icons.arrow_forward : Icons.arrow_back;
         Color iconColor = p.amount > 0 ? Colors.green : Colors.red;
