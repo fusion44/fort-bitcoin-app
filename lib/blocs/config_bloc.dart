@@ -46,7 +46,7 @@ class ConfigurationBloc {
     if (response.statusCode == 200) {
       _successfulFetch(response);
     } else {
-      print("Error while fetching configuration");
+      print("Error while fetching configuration: ${response.statusCode}");
     }
 
     _isInitialized = true;

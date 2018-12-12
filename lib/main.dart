@@ -53,7 +53,8 @@ class FortBitcoinApp extends StatelessWidget {
               return MaterialApp(
                 title: "Fort Bitcoin",
                 theme: ThemeData.dark(),
-                home: SignupPage(errorMessage: asyncSnapshot.data.message),
+                home:
+                    SignupPage(errorMessage: asyncSnapshot.data.message ?? ""),
               );
             default:
               return Center(child: Text("Implement me ${asyncSnapshot.data}"));
