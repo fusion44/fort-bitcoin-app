@@ -8,12 +8,15 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:mobile_app/blocs/list_invoices/list_invoices_bloc.dart';
 import 'package:mobile_app/gql/types/lnchannelbalance.dart';
 import 'package:mobile_app/gql/types/lninvoice.dart';
 import 'package:mobile_app/gql/types/lnpayment.dart';
 import 'package:mobile_app/gql/utils.dart';
 import 'package:mobile_app/models.dart';
+import 'package:mobile_app/pages/lightning_transfers.dart';
 import 'package:mobile_app/widgets/balance_display_lightning.dart';
 import 'package:mobile_app/widgets/card_base.dart';
 import 'package:mobile_app/widgets/card_error.dart';
@@ -190,7 +193,13 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
               Padding(
                   padding: EdgeInsets.only(right: 5.0),
                   child: Text("${invoice.value} $unit")),
-              Text(invoice.memo)
+              Expanded(
+                child: Text(
+                  invoice.memo,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                ),
+              )
             ],
           ));
         } else {
@@ -216,6 +225,22 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
         }
       }
     }
-    return CardBase(_header, Column(children: children), _loading);
+    return CardBase(
+        _header,
+        InkWell(
+          child: Column(children: children),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return BlocProvider<ListInvoicesBloc>(
+                  bloc: ListInvoicesBloc(GraphQLProvider.of(context).value),
+                  child: LightningTransfersPage(),
+                );
+              }),
+            );
+          },
+        ),
+        _loading);
   }
 }

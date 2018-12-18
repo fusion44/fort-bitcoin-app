@@ -62,6 +62,51 @@ subscription InvoicesSubscription {
 }
 """;
 
+String listInvoices = """
+query ListInvoices(\$pendingOnly: Boolean, \$indexOffset: Int, \$numMaxInvoices: Int, \$reverse: Boolean) {
+  lnListInvoices(pendingOnly: \$pendingOnly, indexOffset: \$indexOffset, numMaxInvoices: \$numMaxInvoices, reverse: \$reverse) {
+    __typename
+    ... on ListInvoicesSuccess {
+      invoices {
+        memo
+        receipt
+        rPreimage
+        rHash
+        value
+        settled
+        creationDate
+        settleDate
+        paymentRequest
+        descriptionHash
+        expiry
+        fallbackAddr
+        cltvExpiry
+        routeHints {
+          nodeId
+          chanId
+          feeBaseMsat
+          feeProportionalMillionths
+          cltvExpiryDelta
+        }
+        private
+        addIndex
+        addIndex
+        settleIndex
+        amtPaid
+      }
+      lastIndexOffset
+      firstIndexOffset
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on ListInvoicesError {
+      errorMessage
+    }
+  }
+}
+""";
+
 String listPayments = """
 query listPayments(\$testnet: Boolean) {
   lnListPayments(testnet: \$testnet) {

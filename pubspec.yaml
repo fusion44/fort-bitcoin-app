@@ -25,7 +25,8 @@ dependencies:
   share: ^0.5.3
   unicorndial: ^1.1.5
   flutter_bloc: ^0.3.1
-  flutter_spinkit: "^3.0.0"
+  flutter_spinkit: ^3.0.0
+  built_collection: ^4.1.0
   
 dev_dependencies:
   flutter_test:
