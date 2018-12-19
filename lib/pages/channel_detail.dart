@@ -73,17 +73,13 @@ class _ChannelDetailState extends State<ChannelDetail> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) {
-                          CloseChannelBloc _closeChannelBloc =
-                              BlocProvider.of<CloseChannelBloc>(context);
-
-                          return BlocProvider<CloseChannelBloc>(
-                            bloc: _closeChannelBloc,
-                            child: CloseChannelPage(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return CloseChannelPage(
                               channel: chan,
-                            ),
-                          );
-                        }),
+                            );
+                          },
+                        ),
                       );
                     },
                     heroTag: "close",
