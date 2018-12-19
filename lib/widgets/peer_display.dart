@@ -61,7 +61,6 @@ class _PeerDisplayState extends State<PeerDisplay> {
                       itemBuilder: (BuildContext context) {
                         List<_Choice> _choices = <_Choice>[
                           _Choice(widget._data, 'Disconnect'),
-                          _Choice(widget._data, 'Locate'),
                           _Choice(widget._data, 'Open Channel'),
                         ];
                         return _choices.map(
@@ -110,10 +109,6 @@ class _PeerDisplayState extends State<PeerDisplay> {
     switch (value.title) {
       case "Disconnect":
         widget._onDisconnect(value.peer.pubKey);
-        break;
-      case "Locate":
-        Scaffold.of(context)
-            .showSnackBar(SnackBar(content: Text("Not yet implemented!")));
         break;
       case "Open Channel":
         if (value.peer.hasChannel) {
