@@ -120,7 +120,7 @@ class _StatsPageState extends State<StatsPage> {
             children: <Widget>[
               hasError(["systemstatus"])
                   ? ErrorDisplayCard(
-                      "System Health", _errorMessages["systemstatus"])
+                      "System Health", [_errorMessages["systemstatus"]])
                   : CardNodeStats(
                       _loading,
                       _data["systemstatus"]["uptime"],
@@ -131,7 +131,7 @@ class _StatsPageState extends State<StatsPage> {
                       _data["systemstatus"]["trafficOut"]),
               hasError(["mainnetblocks", "mainnetnetwork"])
                   ? ErrorDisplayCard(
-                      "Bitcoind Mainnet", _errorMessages["systemstatus"])
+                      "Bitcoind Mainnet", [_errorMessages["systemstatus"]])
                   : CardBitcoindStats(
                       _loading,
                       false,
@@ -140,23 +140,9 @@ class _StatsPageState extends State<StatsPage> {
                       _data["mainnetnetwork"]["connections"],
                       _data["mainnetnetwork"]["warnings"],
                     ),
-              hasError(["mainnetln"])
-                  ? ErrorDisplayCard(
-                      "Lightning Mainnet", _errorMessages["mainnetln"])
-                  : CardLndStats(
-                      _loading,
-                      false,
-                      _data["mainnetln"]["alias"],
-                      _data["mainnetln"]["blockHeight"],
-                      _data["mainnetln"]["identityPubkey"],
-                      _data["mainnetln"]["numActiveChannels"],
-                      _data["mainnetln"]["numPeers"],
-                      _data["mainnetln"]["syncedToChain"],
-                      _data["mainnetln"]["version"],
-                    ),
               hasError(["testnetblocks", "testnetnetwork"])
                   ? ErrorDisplayCard(
-                      "Bitcoind Testnet", _errorMessages["testnetblocks"])
+                      "Bitcoind Testnet", [_errorMessages["testnetblocks"]])
                   : CardBitcoindStats(
                       _loading,
                       true,
@@ -165,19 +151,20 @@ class _StatsPageState extends State<StatsPage> {
                       _data["testnetnetwork"]["connections"],
                       _data["testnetnetwork"]["warnings"],
                     ),
-              hasError(["testnetln"])
-                  ? ErrorDisplayCard(
-                      "Lightning Testnet", _errorMessages["testnetln"])
+              hasError(["lnGetInfo"])
+                  ? ErrorDisplayCard("Lightning", [_errorMessages["lnGetInfo"]])
                   : CardLndStats(
                       _loading,
-                      true,
-                      _data["testnetln"]["alias"],
-                      _data["testnetln"]["blockHeight"],
-                      _data["testnetln"]["identityPubkey"],
-                      _data["testnetln"]["numActiveChannels"],
-                      _data["testnetln"]["numPeers"],
-                      _data["testnetln"]["syncedToChain"],
-                      _data["testnetln"]["version"],
+                      _data["lnGetInfo"]["lnInfo"]["testnet"],
+                      _data["lnGetInfo"]["lnInfo"]["alias"],
+                      _data["lnGetInfo"]["lnInfo"]["blockHeight"],
+                      _data["lnGetInfo"]["lnInfo"]["identityPubkey"],
+                      _data["lnGetInfo"]["lnInfo"]["numActiveChannels"],
+                      _data["lnGetInfo"]["lnInfo"]["numInactiveChannels"],
+                      _data["lnGetInfo"]["lnInfo"]["numPendingChannels"],
+                      _data["lnGetInfo"]["lnInfo"]["numPeers"],
+                      _data["lnGetInfo"]["lnInfo"]["syncedToChain"],
+                      _data["lnGetInfo"]["lnInfo"]["version"],
                     ),
             ],
           ));

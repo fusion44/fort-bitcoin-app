@@ -15,6 +15,8 @@ class CardLndStats extends StatelessWidget {
   final int _blockHeight;
   final String _identityPubkey;
   final int _numActiveChannels;
+  final int _numInactiveChannels;
+  final int _numPendingChannels;
   final int _numPeers;
   final bool _syncedToChain;
   final String _version;
@@ -26,6 +28,8 @@ class CardLndStats extends StatelessWidget {
       this._blockHeight = -1,
       this._identityPubkey = "",
       this._numActiveChannels = -1,
+      this._numInactiveChannels = -1,
+      this._numPendingChannels = -1,
       this._numPeers = -1,
       this._syncedToChain = false,
       this._version = ""]);
@@ -49,6 +53,12 @@ class CardLndStats extends StatelessWidget {
               SimpleMetricWidget("Version", _version.toString()),
               SimpleMetricWidget(
                   "Active Channels", _numActiveChannels.toString()),
+              SimpleMetricWidget(
+                  "Inactive Channels", _numInactiveChannels.toString()),
+              _numPendingChannels > 0
+                  ? SimpleMetricWidget(
+                      "Pending Channels", _numPendingChannels.toString())
+                  : Container(),
               SimpleMetricWidget("Peers", _numPeers.toString()),
               SimpleMetricWidget("Synched", _syncedToChain.toString()),
             ]),

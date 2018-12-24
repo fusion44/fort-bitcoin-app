@@ -58,25 +58,22 @@ query getBlocks {
     connections
     warnings
   }
-  testnetln: lnGetInfo(testnet: true) {
-    alias
-    blockHeight
-    identityPubkey
-    numActiveChannels
-    numPeers
-    syncedToChain
-    testnet
-    version
-  }
-  mainnetln: lnGetInfo(testnet: false) {
-    alias
-    blockHeight
-    identityPubkey
-    numActiveChannels
-    numPeers
-    syncedToChain
-    testnet
-    version
+  lnGetInfo: lnGetInfo {
+    __typename
+    ... on GetInfoSuccess {
+      lnInfo {
+        alias
+        blockHeight
+        identityPubkey
+        numActiveChannels
+        numInactiveChannels
+        numPendingChannels
+        numPeers
+        syncedToChain
+        testnet
+        version
+      }
+    }
   }
 }
 """;
