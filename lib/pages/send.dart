@@ -236,7 +236,9 @@ class _SendPageState extends State<SendPage> {
     }
     _client
         .query(QueryOptions(
-            document: sendPaymentForRequest, variables: {"payReq": req}))
+            document: sendPaymentForRequest,
+            variables: {"payReq": req},
+            fetchPolicy: FetchPolicy.networkOnly))
         .then((data) {
       if (data.errors == null) {
         LnSendPaymentResult res =
