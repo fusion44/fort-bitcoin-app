@@ -49,6 +49,7 @@ class _SendPageState extends State<SendPage> {
   String _payReqEncoded;
   LnSendPaymentResult _result;
   String _errorText;
+  final _invoiceController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +57,29 @@ class _SendPageState extends State<SendPage> {
 
     switch (_currentState) {
       case _PageStates.initial:
-        _currentPage = Text("Waiting");
+        _currentPage = Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(
+                maxLines: 5,
+                autofocus: false,
+                controller: _invoiceController,
+                decoration:
+                    InputDecoration(labelText: "Paste your invoice here"),
+              ),
+            ),
+            RaisedButton(
+              child: Text("Check Invoice"),
+              onPressed: () {
+                setState(() {
+                  _currentState = _PageStates.decoding;
+                });
+                checkPayRequest(_invoiceController.value.text);
+              },
+            )
+          ],
+        );
         break;
       case _PageStates.scanning:
         _currentPage = Container();
@@ -140,7 +163,8 @@ class _SendPageState extends State<SendPage> {
     }
 
     return Scaffold(
-      body: Center(child: _currentPage),
+      resizeToAvoidBottomPadding: false,
+      body: _currentPage,
       floatingActionButton: _currentState == _PageStates.initial
           ? FloatingActionButton(
               onPressed: () {
