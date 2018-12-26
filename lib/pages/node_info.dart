@@ -37,6 +37,7 @@ class _NodeInfoPageState extends State<NodeInfoPage> {
     return BlocBuilder<NodeInfoEvent, NodeInfoState>(
         bloc: _nodeInfoBloc,
         builder: (BuildContext context, NodeInfoState infoState) {
+          if (infoState.isLoading) return LinearProgressIndicator();
           String address =
               "${infoState.info.identityPubkey}@${infoState.info.currentIp}:${infoState.info.currentPort}";
 

@@ -20,7 +20,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String appBarText = StatsPage.appBarText;
-  DrawerPages _drawerPage = DrawerPages.manage_wallet;
+  DrawerPages _drawerPage = DrawerPages.finance;
 
   @override
   Widget build(BuildContext context) {

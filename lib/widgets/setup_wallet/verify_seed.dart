@@ -44,8 +44,7 @@ class _VerifySeedWidgetState extends State<VerifySeedWidget> {
           TextFormField(
               controller: _word1Controller,
               decoration: InputDecoration(
-                  labelText:
-                      "Enter word ${widget.word1Pos + 1} ${widget.word1}"),
+                  labelText: "Enter word ${widget.word1Pos + 1}"),
               validator: (value) {
                 if (value != widget.word1) {
                   return "Word one doesn't match";
@@ -53,8 +52,7 @@ class _VerifySeedWidgetState extends State<VerifySeedWidget> {
               }),
           TextFormField(
               decoration: InputDecoration(
-                  labelText:
-                      "Enter word ${widget.word2Pos + 1} ${widget.word2}"),
+                  labelText: "Enter word ${widget.word2Pos + 1}"),
               controller: _word2Controller,
               validator: (value) {
                 if (value != widget.word2) {
