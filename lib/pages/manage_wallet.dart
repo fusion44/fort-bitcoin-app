@@ -20,6 +20,7 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
   bool _loading = false;
   LnInfoType _info;
   String _error;
+  bool _autopilot = false;
 
   @override
   void didChangeDependencies() {
@@ -61,6 +62,18 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
                 style: theme.textTheme.display1,
               ),
               Text("Your wallet daemon is currently offline"),
+              Row(
+                children: <Widget>[
+                  Checkbox(
+                      value: _autopilot,
+                      onChanged: (bool checked) {
+                        setState(() {
+                          _autopilot = checked;
+                        });
+                      }),
+                  Text("Autopilot")
+                ],
+              ),
               TextField(
                 enabled: !_loading,
                 autocorrect: false,
@@ -101,7 +114,10 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
       _loading = true;
     });
 
-    var v = {"walletPassword": _passwordController.value.text};
+    var v = {
+      "walletPassword": _passwordController.value.text,
+      "autopilot": _autopilot
+    };
     QueryResult result = await _client.query(QueryOptions(
       document: startDaemon,
       variables: v,

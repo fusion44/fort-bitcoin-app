@@ -146,8 +146,8 @@ String listPeersQuery = """
 """;
 
 String startDaemon = """
-mutation sd(\$walletPassword: String!) {
-  startDaemon(walletPassword: \$walletPassword) {
+mutation sd(\$walletPassword: String!, \$autopilot: Boolean = true) {
+  startDaemon(walletPassword: \$walletPassword, autopilot: \$autopilot) {
     __typename
     ... on StartDaemonSuccess {
       info {
