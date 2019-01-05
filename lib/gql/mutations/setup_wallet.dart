@@ -5,8 +5,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 String lnCreateWalletQuery = """
-mutation createLightningWallet(\$name: String!, \$publicAlias: String) {
-  createLightningWallet(name: \$name, publicAlias: \$publicAlias) {
+mutation createLightningWallet(\$name: String!, \$publicAlias: String, \$autopilot: Boolean = true) {
+  createLightningWallet(name: \$name, publicAlias: \$publicAlias, autopilot: \$autopilot) {
     __typename
     ... on Unauthenticated {
       errorMessage
