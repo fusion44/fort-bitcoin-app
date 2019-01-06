@@ -32,21 +32,22 @@ query getLightningFinanceInfo {
       errorMessage
     }
   }
-  lnListPayments {
+  lnListPayments(numMaxPayments: 7) {
     __typename
     ... on ListPaymentsSuccess {
-      lnTransactionDetails {
-        payments {
-          paymentHash
-          value
-          creationDate
-          path
-          fee
-          paymentPreimage
-        }
+      payments {
+        paymentHash
+        value
+        creationDate
+        path
+        fee
+        paymentPreimage
       }
     }
     ... on ServerError {
+      errorMessage
+    }
+    ... on ListPaymentsError {
       errorMessage
     }
   }

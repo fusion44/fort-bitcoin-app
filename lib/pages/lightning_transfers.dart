@@ -6,6 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app/widgets/invoice_list.dart';
+import 'package:mobile_app/widgets/payments_list.dart';
 
 class LightningTransfersPage extends StatelessWidget {
   @override
@@ -30,7 +31,7 @@ class LightningTransfersPage extends StatelessWidget {
         body: TabBarView(
           children: <Widget>[
             InvoiceList(),
-            ListView(children: [Text("1"), Text("2")]),
+            PaymentsList(),
           ],
         ),
       ),

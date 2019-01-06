@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/blocs/list_invoices/list_invoices_bloc.dart';
+import 'package:mobile_app/blocs/list_payments/list_payments_bloc.dart';
 import 'package:mobile_app/gql/types/lnchannelbalance.dart';
 import 'package:mobile_app/gql/types/lninvoice.dart';
 import 'package:mobile_app/gql/types/lnpayment.dart';
@@ -106,7 +107,7 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
 
         // preprocess payments data
         if (listPayments["__typename"] == "ListPaymentsSuccess") {
-          List payments = listPayments["lnTransactionDetails"]["payments"];
+          List payments = listPayments["payments"];
           for (var tx in payments) {
             LnPayment payment = LnPayment(tx);
             _transactionData[tx["creationDate"]] = payment;
@@ -230,12 +231,16 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
         InkWell(
           child: Column(children: children),
           onTap: () {
+            GraphQLClient qlClient = GraphQLProvider.of(context).value;
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) {
-                return BlocProvider<ListInvoicesBloc>(
-                  bloc: ListInvoicesBloc(GraphQLProvider.of(context).value),
-                  child: LightningTransfersPage(),
+                return BlocProvider<ListPaymentsBloc>(
+                  bloc: ListPaymentsBloc(qlClient),
+                  child: BlocProvider<ListInvoicesBloc>(
+                    bloc: ListInvoicesBloc(qlClient),
+                    child: LightningTransfersPage(),
+                  ),
                 );
               }),
             );

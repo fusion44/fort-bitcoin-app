@@ -108,12 +108,24 @@ query ListInvoices(\$pendingOnly: Boolean, \$indexOffset: Int, \$numMaxInvoices:
 """;
 
 String listPayments = """
-query listPayments(\$testnet: Boolean) {
-  lnListPayments(testnet: \$testnet) {
-    payments {
-      value
-      creationDate
-      fee
+query ListPayments(\$indexOffset: Int, \$numMaxPayments: Int, \$reverse: Boolean) {
+  lnListPayments(indexOffset: \$indexOffset, numMaxPayments: \$numMaxPayments, reverse: \$reverse) {
+    __typename
+    ... on ListPaymentsSuccess {
+      payments {
+        paymentHash
+        value
+        creationDate
+        path
+        fee
+        paymentPreimage
+      }
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on ListPaymentsError {
+      errorMessage
     }
   }
 }
