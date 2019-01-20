@@ -27,3 +27,35 @@ mutation createUser(\$username: String!, \$password: String!, \$email: String) {
 }
 
 """;
+
+String getWalletStatus = """
+{
+  getLnWalletStatus {
+    __typename
+    ... on Unauthenticated {
+      errorMessage
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on GetLnWalletStatusError {
+      errorMessage
+    }
+    ... on WalletInstanceNotFound {
+      errorMessage
+      suggestions
+    }
+    ... on WalletInstanceNotRunning {
+      errorMessage
+      suggestions
+    }
+    ... on GetLnWalletStatusLocked {
+      errorMessage
+      suggestions
+    }
+    ... on GetLnWalletStatusOperational {
+      info
+    }
+  }
+}
+""";

@@ -7,13 +7,12 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import 'dart:async';
 import 'dart:convert';
 import 'package:mobile_app/config.dart';
-import 'package:mobile_app/gql/queries/system_status.dart';
 import 'package:mobile_app/gql/queries/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_app/models.dart';
 
-enum WalletState { notInitialized, notRunning, ready, unknown }
+enum WalletState { notInitialized, notRunning, locked, ready, unknown }
 
 // Depicts the current auth state
 enum AuthState {
@@ -44,6 +43,8 @@ class AuthData {
 
 /*
 Singleton class that helps managing user authentication.
+
+TODO: Refactor this class into a BLoC
 */
 class AuthHelper {
   static String _url = "$endPoint";
@@ -67,6 +68,8 @@ class AuthHelper {
 
   bool _isInitialized = false;
 
+  SharedPreferences _prefs;
+
   Future<AuthState> init() async {
     if (_isInitialized) {
       return _authState;
@@ -75,19 +78,9 @@ class AuthHelper {
     _isInitialized = true;
     _setState(AuthState.loggingIn);
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool("authenticated") ?? false) {
-      _user = User(
-          prefs.getInt("auth_id"),
-          prefs.getString("auth_username"),
-          prefs.getString("auth_token"),
-          prefs.getBool("wallet_is_initialized"));
-    } else {
-      _setState(AuthState.loggedOut);
-      return _authState;
-    }
-
-    String json = jsonEncode({"token": _user.token});
+    _prefs = await SharedPreferences.getInstance();
+    String token = _prefs.getString("auth_token");
+    String json = jsonEncode({"token": token});
     http.Response response = await http.post(_verifyApi,
         headers: {"Content-Type": "application/json"}, body: json);
 
@@ -168,16 +161,12 @@ class AuthHelper {
   Future _successfulLogin(http.Response response) async {
     var body = jsonDecode(response.body);
 
-    _walletState = await isWalletInitialized(body["token"]);
+    _walletState = await getWalletState(body["token"]);
 
-    if (_user == null) {
-      bool walletIsInitialized =
-          _walletState == WalletState.notInitialized ? false : true;
-      _user = User(body["user"]['id'], body["user"]['username'], body["token"],
-          walletIsInitialized);
-    } else {
-      _user.token = body["token"];
-    }
+    bool walletIsInitialized =
+        _walletState == WalletState.notInitialized ? false : true;
+    _user = User(body["user"]['id'], body["user"]['username'], body["token"],
+        walletIsInitialized);
 
     _setState(AuthState.loggedIn);
 
@@ -186,7 +175,6 @@ class AuthHelper {
     await prefs.setInt("auth_id", _user.id);
     await prefs.setString('auth_token', _user.token);
     await prefs.setString('auth_username', _user.name);
-    await prefs.setBool("wallet_is_initialized", _user.walletIsInitialized);
   }
 
   Future _reset(AuthState state, {String error = ""}) async {
@@ -203,8 +191,8 @@ class AuthHelper {
     _streamController.add(AuthData(newState, message, user));
   }
 
-  Future<WalletState> isWalletInitialized(String token) async {
-    var json = jsonEncode({"query": getInfoQuery});
+  Future<WalletState> getWalletState(String token) async {
+    var json = jsonEncode({"query": getWalletStatus});
     var authToken = "JWT $token";
     http.Response response = await http.post(_gql,
         headers: {
@@ -215,14 +203,18 @@ class AuthHelper {
 
     if (response.statusCode == 200) {
       var json = jsonDecode(response.body);
-      var typename = json["data"]["lnGetInfo"]["__typename"];
+      var typename = json["data"]["getLnWalletStatus"]["__typename"];
       switch (typename) {
-        case "GetInfoSuccess":
+        case "GetLnWalletStatusOperational":
           return WalletState.ready;
+        case "GetLnWalletStatusLocked":
+          return WalletState.locked;
         case "WalletInstanceNotRunning":
           return WalletState.notRunning;
         case "WalletInstanceNotFound":
           return WalletState.notInitialized;
+        case "GetLnWalletStatusError":
+          return WalletState.unknown;
         default:
           return WalletState.unknown;
       }
