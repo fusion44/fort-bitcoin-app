@@ -5,6 +5,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/blocs/auth/auth/authentication.dart';
+import 'package:mobile_app/blocs/auth/login/login.dart';
 import 'package:mobile_app/widgets/login.dart';
 import 'package:mobile_app/widgets/register.dart';
 
@@ -17,6 +20,18 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  AuthenticationBloc _authenticationBloc;
+  LoginBloc _loginBloc;
+
+  @override
+  void initState() {
+    _authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
+    _loginBloc = LoginBloc(
+      authBloc: _authenticationBloc,
+    );
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
@@ -45,7 +60,7 @@ class _SignupPageState extends State<SignupPage> {
           ),
           body: TabBarView(
             children: [
-              LoginWidget(),
+              LoginWidget(loginBloc: _loginBloc),
               RegisterWidget(),
             ],
           ),

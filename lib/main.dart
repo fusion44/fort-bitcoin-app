@@ -7,13 +7,14 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/authhelper.dart';
+import 'package:mobile_app/blocs/auth/auth/authentication.dart';
 import 'package:mobile_app/blocs/channels_bloc.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/blocs/node_info_bloc.dart';
 import 'package:mobile_app/blocs/open_channel/open_channel_bloc.dart';
 import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/config.dart';
+import 'package:mobile_app/models.dart';
 import 'package:mobile_app/pages/home.dart';
 import 'package:mobile_app/pages/setup_wallet.dart';
 import 'package:mobile_app/pages/signup.dart';
@@ -21,100 +22,115 @@ import 'package:mobile_app/pages/splash.dart';
 import 'package:mobile_app/routes.dart';
 
 void main() async {
-  AuthHelper().init();
   ConfigurationBloc().init();
-
   runApp(FortBitcoinApp());
 }
 
-class FortBitcoinApp extends StatelessWidget {
+class FortBitcoinApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    StreamBuilder<AuthData> builder = StreamBuilder(
-      initialData: AuthData.initial(),
-      stream: AuthHelper().eventStream,
-      builder: (context, asyncSnapshot) {
-        if (asyncSnapshot.hasError) {
-          return new Center(child: Text("error"));
-        }
-        if (asyncSnapshot.hasData) {
-          switch (asyncSnapshot.data.state) {
-            case AuthState.loggingIn:
-              return MaterialApp(
-                title: 'Fort Bitcoin',
-                theme: ThemeData.dark(),
-                home: SplashPage(),
-              );
-            case AuthState.loggedIn:
-              return _buildGraphQLProvider();
-            case AuthState.loggedOut:
-            case AuthState.loggingOut:
-            case AuthState.loginError:
-              return MaterialApp(
-                title: "Fort Bitcoin",
-                theme: ThemeData.dark(),
-                home:
-                    SignupPage(errorMessage: asyncSnapshot.data.message ?? ""),
-              );
-            default:
-              return Center(child: Text("Implement me ${asyncSnapshot.data}"));
-          }
-        }
-      },
-    );
-
-    return MaterialApp(title: 'Fort Bitcoin', home: builder);
+  FortBitcoinAppState createState() {
+    return FortBitcoinAppState();
   }
 }
 
-GraphQLProvider _buildGraphQLProvider() {
-  HttpLink link = HttpLink(
-    uri: '$endPoint/gql/',
-    headers: <String, String>{
-      'Authorization': 'JWT ${AuthHelper().user.token}',
-    },
-  );
-  GraphQLClient gqlCLient = GraphQLClient(
-    cache: InMemoryCache(),
-    link: link,
-  );
+class FortBitcoinAppState extends State<FortBitcoinApp> {
+  AuthenticationBloc _authBloc;
 
-  Widget page;
-  String route;
-  if (AuthHelper().user.walletIsInitialized) {
-    page = HomePage();
-    route = "/home";
-  } else {
-    page = SetupWalletPage();
-    route = "/setup_wallet";
+  @override
+  void initState() {
+    _authBloc = AuthenticationBloc();
+    _authBloc.dispatch(AppStarted());
+    super.initState();
   }
 
-  return GraphQLProvider(
-    client: ValueNotifier(gqlCLient),
-    child: MaterialApp(
-      builder: (BuildContext context, Widget child) {
-        var channelBloc = ChannelBloc(gqlCLient);
-        var openChannelBloc = OpenChannelBloc();
-        var peersBloc = PeerBloc(gqlCLient);
-        var nodeInfoBloc = NodeInfoBloc(gqlCLient);
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<AuthenticationBloc>(
+      bloc: _authBloc,
+      child: MaterialApp(
+        home: BlocBuilder<AuthenticationEvent, AuthenticationState>(
+          bloc: _authBloc,
+          builder: (BuildContext context, AuthenticationState state) {
+            if (state is AuthenticationUninitialized ||
+                state is AuthenticationLoading) {
+              return _buildMaterialApp(SplashPage());
+            }
 
-        return BlocProvider<ChannelBloc>(
-          bloc: channelBloc,
-          child: BlocProvider<OpenChannelBloc>(
-            bloc: openChannelBloc,
-            child: BlocProvider<PeerBloc>(
-              bloc: peersBloc,
-              child:
-                  BlocProvider<NodeInfoBloc>(bloc: nodeInfoBloc, child: child),
-            ),
-          ),
-        );
+            if (state is AuthenticationUnauthenticated) {
+              return _buildMaterialApp(
+                SignupPage(),
+              );
+            }
+
+            if (state is AuthenticationAuthenticated) {
+              return _buildGraphQLProvider(state.user.walletState);
+            }
+
+            return Center(child: Text("Implement me $state"));
+          },
+        ),
+      ),
+    );
+  }
+
+  GraphQLProvider _buildGraphQLProvider(WalletState walletState) {
+    String token = _authBloc.userRepository.user.token;
+    HttpLink link = HttpLink(
+      uri: '$endPoint/gql/',
+      headers: <String, String>{
+        "Authorization": "JWT $token",
       },
-      title: 'Fort Bitcoin',
-      theme: ThemeData.dark(),
-      home: page,
-      initialRoute: route,
-      routes: routes,
-    ),
+    );
+    GraphQLClient gqlCLient = GraphQLClient(
+      cache: InMemoryCache(),
+      link: link,
+    );
+
+    Widget page;
+    String route;
+    if (walletState == WalletState.notInitialized) {
+      page = SetupWalletPage();
+      route = "/setup_wallet";
+    } else {
+      page = HomePage();
+      route = "/home";
+    }
+
+    return GraphQLProvider(
+      client: ValueNotifier(gqlCLient),
+      child: MaterialApp(
+        builder: (BuildContext context, Widget child) {
+          var channelBloc = ChannelBloc(gqlCLient);
+          var openChannelBloc = OpenChannelBloc(token);
+          var peersBloc = PeerBloc(gqlCLient);
+          var nodeInfoBloc = NodeInfoBloc(gqlCLient);
+
+          return BlocProvider<ChannelBloc>(
+            bloc: channelBloc,
+            child: BlocProvider<OpenChannelBloc>(
+              bloc: openChannelBloc,
+              child: BlocProvider<PeerBloc>(
+                bloc: peersBloc,
+                child: BlocProvider<NodeInfoBloc>(
+                    bloc: nodeInfoBloc, child: child),
+              ),
+            ),
+          );
+        },
+        title: 'Fort Bitcoin',
+        theme: ThemeData.dark(),
+        home: page,
+        initialRoute: route,
+        routes: routes,
+      ),
+    );
+  }
+}
+
+MaterialApp _buildMaterialApp(Widget home) {
+  return MaterialApp(
+    title: "Fort Bitcoin",
+    theme: ThemeData.dark(),
+    home: home,
   );
 }

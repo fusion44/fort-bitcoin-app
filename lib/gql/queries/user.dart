@@ -59,3 +59,53 @@ String getWalletStatus = """
   }
 }
 """;
+
+String getUserInfo = """
+{
+  getCurrentUser {
+    __typename
+    ... on Unauthenticated {
+      errorMessage
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on GetCurrentUserError {
+      errorMessage
+    }
+    ... on GetCurrentUserSuccess {
+      user {
+        id
+        username
+      }
+    }
+  }
+  getLnWalletStatus {
+    __typename
+    ... on Unauthenticated {
+      errorMessage
+    }
+    ... on ServerError {
+      errorMessage
+    }
+    ... on GetLnWalletStatusError {
+      errorMessage
+    }
+    ... on WalletInstanceNotFound {
+      errorMessage
+      suggestions
+    }
+    ... on WalletInstanceNotRunning {
+      errorMessage
+      suggestions
+    }
+    ... on GetLnWalletStatusLocked {
+      errorMessage
+      suggestions
+    }
+    ... on GetLnWalletStatusOperational {
+      info
+    }
+  }
+}
+""";

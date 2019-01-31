@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/blocs/close_channel/close_channel_bloc_events.dart';
 import 'package:mobile_app/blocs/close_channel/close_channel_bloc_input.dart';
 import 'package:mobile_app/blocs/close_channel/close_channel_bloc_state.dart';
@@ -16,8 +15,11 @@ import 'package:mobile_app/gql/mutations/channels.dart';
 import '../../config.dart' as config;
 
 class CloseChannelBloc extends Bloc<CloseChannelEvent, ChannelCloseState> {
+  final String _token;
   SocketClient _socketClient;
   StreamSubscription<SubscriptionData> _subscription;
+
+  CloseChannelBloc(this._token);
 
   ChannelCloseState get initialState => ChannelCloseState.initial();
 
@@ -60,8 +62,8 @@ class CloseChannelBloc extends Bloc<CloseChannelEvent, ChannelCloseState> {
 
   void _closeChannelImpl(StartCloseChannelInput input) async {
     _socketClient = await SocketClient.connect(config.endPointWS, headers: {
-      'content-type': 'application/json',
-      'Authorization': 'JWT ${AuthHelper().user.token}'
+      "content-type": "application/json",
+      "Authorization": "JWT $_token"
     });
 
     _subscription = _socketClient

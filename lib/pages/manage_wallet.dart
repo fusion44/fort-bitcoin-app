@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/authhelper.dart';
+import 'package:mobile_app/blocs/auth/auth/authentication.dart';
 import 'package:mobile_app/gql/queries/system_status.dart';
 import 'package:mobile_app/gql/types/lninfo.dart';
+import 'package:mobile_app/models.dart';
 
 enum _Views { walletNotRunning, showInfo, showError }
 
@@ -28,15 +30,16 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
     if (_client == null) {
       _client = GraphQLProvider.of(context).value;
     }
-
-    if (AuthHelper().walletState == WalletState.notRunning) {
-      _currentView = _Views.walletNotRunning;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
+
+    AuthenticationBloc bloc = BlocProvider.of<AuthenticationBloc>(context);
+    if (bloc.userRepository.user.walletState == WalletState.notRunning) {
+      _currentView = _Views.walletNotRunning;
+    }
 
     Widget currentView;
     switch (_currentView) {

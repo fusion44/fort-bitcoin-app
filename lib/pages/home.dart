@@ -5,7 +5,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
-import 'package:mobile_app/authhelper.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/blocs/auth/auth/authentication.dart';
+import 'package:mobile_app/models.dart';
 import 'package:mobile_app/pages/connectivity.dart';
 import 'package:mobile_app/pages/finance.dart';
 import 'package:mobile_app/pages/manage_wallet.dart';
@@ -24,9 +26,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    AuthenticationBloc bloc = BlocProvider.of<AuthenticationBloc>(context);
     Widget body;
 
-    if (AuthHelper().walletState == WalletState.notRunning) {
+    if (bloc.userRepository.user.walletState == WalletState.notRunning) {
       _drawerPage = DrawerPages.manage_wallet;
     }
 
@@ -49,6 +52,7 @@ class _HomePageState extends State<HomePage> {
         break;
       default:
     }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarText),

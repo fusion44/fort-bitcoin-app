@@ -17,8 +17,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class CloseChannelPage extends StatefulWidget {
   final LnChannel channel;
-
-  const CloseChannelPage({Key key, this.channel}) : super(key: key);
+  final String token;
+  const CloseChannelPage({Key key, this.channel, this.token}) : super(key: key);
 
   _CloseChannelPageState createState() => _CloseChannelPageState();
 }
@@ -37,7 +37,11 @@ class _CloseChannelPageState extends State<CloseChannelPage> {
 
   bool _force = false;
 
-  CloseChannelBloc _bloc = CloseChannelBloc();
+  CloseChannelBloc _bloc;
+
+  _CloseChannelPageState() {
+    CloseChannelBloc(widget.token);
+  }
 
   @override
   void dispose() {

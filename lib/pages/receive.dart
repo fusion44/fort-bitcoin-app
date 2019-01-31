@@ -5,18 +5,10 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/authhelper.dart';
-import 'package:mobile_app/gql/queries/payments.dart';
-import 'package:mobile_app/gql/types/lninvoice.dart';
-import 'package:mobile_app/gql/types/lninvoiceresponse.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/blocs/auth/auth/authentication.dart';
 import 'package:mobile_app/pages/receive_lightning.dart';
 import 'package:mobile_app/pages/receive_onchain.dart';
-import 'package:mobile_app/widgets/scale_in_animated_icon.dart';
-import 'package:mobile_app/widgets/show_invoice_qr.dart';
-import 'package:mobile_app/widgets/simple_metric.dart';
-
-import '../config.dart' as config;
 
 class ReceivePage extends StatefulWidget {
   static IconData icon = Icons.info;
@@ -51,8 +43,11 @@ class _ReceivePageState extends State<ReceivePage> {
 
   @override
   Widget build(BuildContext context) {
+    AuthenticationBloc bloc = BlocProvider.of<AuthenticationBloc>(context);
+
     return _onChain
         ? ReceiveOnchainPage(this._switchMode)
-        : ReceiveLightningPage(this._switchMode);
+        : ReceiveLightningPage(
+            this._switchMode, bloc.userRepository.user.token);
   }
 }

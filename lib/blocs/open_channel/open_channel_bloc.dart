@@ -18,8 +18,11 @@ import 'package:mobile_app/gql/types/lnchannelpoint.dart';
 import '../../config.dart' as config;
 
 class OpenChannelBloc extends Bloc<OpenChannelEvent, ChannelOpenState> {
+  final String _token;
   SocketClient _socketClient;
   StreamSubscription<SubscriptionData> _subscription;
+
+  OpenChannelBloc(this._token);
 
   ChannelOpenState get initialState => ChannelOpenState.initial();
   @override
@@ -74,8 +77,8 @@ class OpenChannelBloc extends Bloc<OpenChannelEvent, ChannelOpenState> {
 
   void _openChannelImpl(StartOpenChannelInput input) async {
     _socketClient = await SocketClient.connect(config.endPointWS, headers: {
-      'content-type': 'application/json',
-      'Authorization': 'JWT ${AuthHelper().user.token}'
+      "content-type": "application/json",
+      "Authorization": "JWT $_token"
     });
 
     _subscription = _socketClient

@@ -5,7 +5,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
-import 'package:mobile_app/authhelper.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/blocs/auth/auth/authentication.dart';
+import 'package:mobile_app/blocs/auth/logout/logout.dart';
 import 'package:mobile_app/pages/connectivity.dart';
 import 'package:mobile_app/pages/finance.dart';
 import 'package:mobile_app/pages/manage_wallet.dart';
@@ -24,10 +26,12 @@ class FortBtcDrawerState extends State<FortBtcDrawer> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
+    AuthenticationBloc authBloc = BlocProvider.of<AuthenticationBloc>(context);
+
     Widget drawerHeader = UserAccountsDrawerHeader(
       accountEmail: Text(""),
       accountName: Text(
-        AuthHelper().user.name,
+        authBloc.userRepository.user.name,
         style: theme.textTheme.title,
       ),
       onDetailsPressed: () {
@@ -44,7 +48,8 @@ class FortBtcDrawerState extends State<FortBtcDrawer> {
         ListTile(
             title: Text("Logout"),
             onTap: () {
-              AuthHelper().logout();
+              LogoutBloc lobloc = LogoutBloc(authBloc: authBloc);
+              lobloc.dispatch(LogoutButtonPressed());
             })
       ]);
     } else {

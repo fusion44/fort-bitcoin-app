@@ -4,6 +4,9 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+// Represents a users current Wallet state on the server
+enum WalletState { notInitialized, notRunning, locked, ready, unknown }
+
 // Represents a user data object.
 class User {
   int _userid;
@@ -14,13 +17,12 @@ class User {
 
   String token;
 
-  bool _walletIsInitialized;
-  bool get walletIsInitialized => _walletIsInitialized;
+  WalletState walletState;
 
-  User(this._userid, this._username, this.token, this._walletIsInitialized);
+  User(this._userid, this._username, this.token, this.walletState);
 
   static User empty() {
-    return User(0, "", "", false);
+    return User(0, "", "", WalletState.unknown);
   }
 }
 

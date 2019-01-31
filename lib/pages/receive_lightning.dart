@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/gql/queries/payments.dart';
 import 'package:mobile_app/gql/types/lninvoice.dart';
 import 'package:mobile_app/gql/types/lninvoiceresponse.dart';
@@ -20,7 +19,9 @@ import '../config.dart' as config;
 
 class ReceiveLightningPage extends StatefulWidget {
   final void Function(bool onChain) _switchMode;
-  ReceiveLightningPage(this._switchMode);
+  final String token;
+
+  ReceiveLightningPage(this._switchMode, this.token);
 
   @override
   _ReceiveLightningPageState createState() => _ReceiveLightningPageState();
@@ -66,8 +67,8 @@ class _ReceiveLightningPageState extends State<ReceiveLightningPage> {
 
   void _makeSock() async {
     _socketClient = await SocketClient.connect(config.endPointWS, headers: {
-      'content-type': 'application/json',
-      'Authorization': 'JWT ${AuthHelper().user.token}'
+      "content-type": "application/json",
+      "Authorization": "JWT ${widget.token}"
     });
     _subscription = _socketClient
         .subscribe(SubscriptionRequest(
