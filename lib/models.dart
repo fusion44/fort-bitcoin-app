@@ -5,7 +5,14 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 // Represents a users current Wallet state on the server
-enum WalletState { notInitialized, notRunning, locked, ready, unknown }
+enum WalletState {
+  notFound,
+  notInitialized,
+  notRunning,
+  locked,
+  ready,
+  unknown
+}
 
 // Represents a user data object.
 class User {

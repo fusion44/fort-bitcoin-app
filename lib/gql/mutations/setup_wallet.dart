@@ -58,19 +58,7 @@ mutation initWallet(\$aezeedPassphrase: String, \$cipherSeedMnemonic: [String], 
       errorMessage
     }
     ... on InitWalletSuccess {
-      info {
-        identityPubkey
-        alias
-        numPendingChannels
-        numActiveChannels
-        numPeers
-        blockHeight
-        blockHash
-        syncedToChain
-        testnet
-        bestHeaderTimestamp
-        version
-      }
+      status
     }
   }
 }

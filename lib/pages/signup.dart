@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/blocs/auth/auth/authentication.dart';
 import 'package:mobile_app/blocs/auth/login/login.dart';
+import 'package:mobile_app/blocs/auth/register/register.dart';
 import 'package:mobile_app/widgets/login.dart';
 import 'package:mobile_app/widgets/register.dart';
 
@@ -22,13 +23,13 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   AuthenticationBloc _authenticationBloc;
   LoginBloc _loginBloc;
+  RegisterBloc _registerBloc;
 
   @override
   void initState() {
     _authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
-    _loginBloc = LoginBloc(
-      authBloc: _authenticationBloc,
-    );
+    _loginBloc = LoginBloc(authBloc: _authenticationBloc);
+    _registerBloc = RegisterBloc(authBloc: _authenticationBloc);
     super.initState();
   }
 
@@ -61,7 +62,7 @@ class _SignupPageState extends State<SignupPage> {
           body: TabBarView(
             children: [
               LoginWidget(loginBloc: _loginBloc),
-              RegisterWidget(),
+              RegisterWidget(registerBloc: _registerBloc),
             ],
           ),
         ),

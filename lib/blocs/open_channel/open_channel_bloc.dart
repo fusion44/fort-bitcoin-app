@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/authhelper.dart';
 import 'package:mobile_app/blocs/open_channel/open_channel_bloc_events.dart';
 import 'package:mobile_app/blocs/open_channel/open_channel_bloc_input.dart';
 import 'package:mobile_app/blocs/open_channel/open_channel_bloc_state.dart';

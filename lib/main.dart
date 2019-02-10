@@ -88,7 +88,8 @@ class FortBitcoinAppState extends State<FortBitcoinApp> {
 
     Widget page;
     String route;
-    if (walletState == WalletState.notInitialized) {
+    if (walletState == WalletState.notFound ||
+        walletState == WalletState.notInitialized) {
       page = SetupWalletPage();
       route = "/setup_wallet";
     } else {
