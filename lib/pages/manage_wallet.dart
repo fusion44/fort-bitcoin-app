@@ -24,9 +24,14 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
   String _error;
   bool _autopilot = false;
 
+  AuthenticationBloc _authBloc;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_authBloc == null) {
+      _authBloc = BlocProvider.of<AuthenticationBloc>(context);
+    }
     if (_client == null) {
       _client = GraphQLProvider.of(context).value;
     }
@@ -36,9 +41,10 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    AuthenticationBloc bloc = BlocProvider.of<AuthenticationBloc>(context);
-    if (bloc.userRepository.user.walletState == WalletState.notRunning) {
+    if (_authBloc.userRepository.user.walletState == WalletState.notRunning) {
       _currentView = _Views.walletNotRunning;
+    } else {
+      _currentView = _Views.showInfo;
     }
 
     Widget currentView;
@@ -131,6 +137,7 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
       case "StartDaemonSuccess":
         var info = LnInfoType(result.data["startDaemon"]["info"]);
         _passwordController.clear();
+        _authBloc.userRepository.user.walletState = WalletState.ready;
         setState(() {
           _info = info;
           _currentView = _Views.showInfo;
@@ -153,6 +160,7 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
     var typename = result.data["lnStopDaemon"]["__typename"];
     switch (typename) {
       case "StopDaemonSuccess":
+        _authBloc.userRepository.user.walletState = WalletState.notRunning;
         setState(() {
           _info = null;
           _currentView = _Views.walletNotRunning;
