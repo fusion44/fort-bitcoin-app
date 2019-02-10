@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/blocs/auth/auth/authentication.dart';
 import 'package:mobile_app/gql/queries/system_status.dart';
-import 'package:mobile_app/gql/types/lninfo.dart';
 import 'package:mobile_app/models.dart';
 
 enum _Views { walletNotRunning, showInfo, showError }
@@ -20,7 +19,6 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
   _Views _currentView = _Views.showInfo;
   final TextEditingController _passwordController = TextEditingController();
   bool _loading = false;
-  LnInfoType _info;
   String _error;
   bool _autopilot = false;
 
@@ -135,11 +133,9 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
     var typename = result.data["startDaemon"]["__typename"];
     switch (typename) {
       case "StartDaemonSuccess":
-        var info = LnInfoType(result.data["startDaemon"]["info"]);
         _passwordController.clear();
         _authBloc.userRepository.user.walletState = WalletState.ready;
         setState(() {
-          _info = info;
           _currentView = _Views.showInfo;
           _loading = false;
         });
@@ -162,7 +158,6 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
       case "StopDaemonSuccess":
         _authBloc.userRepository.user.walletState = WalletState.notRunning;
         setState(() {
-          _info = null;
           _currentView = _Views.walletNotRunning;
           _loading = false;
         });
@@ -172,7 +167,6 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
         setState(() {
           _currentView = _Views.showError;
           _error = result.data["lnStopDaemon"]["errorMessage"];
-          _info = null;
           _loading = false;
         });
         break;
@@ -180,7 +174,6 @@ class _ManageWalletPageState extends State<ManageWalletPage> {
         setState(() {
           _currentView = _Views.showError;
           _error = "Implement me: $typename";
-          _info = null;
           _loading = false;
         });
     }

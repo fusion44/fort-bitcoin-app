@@ -11,8 +11,7 @@ import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/widgets/channel_display.dart';
 
 class ChannelsPage extends StatelessWidget {
-  final bool _testnet;
-  ChannelsPage([this._testnet = false]);
+  ChannelsPage();
 
   @override
   Widget build(BuildContext context) {

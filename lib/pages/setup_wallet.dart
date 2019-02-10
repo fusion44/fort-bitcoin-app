@@ -9,8 +9,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/gql/mutations/setup_wallet.dart';
-import 'package:mobile_app/gql/types/lnd_wallet.dart';
-import 'package:mobile_app/gql/types/lninfo.dart';
 import 'package:mobile_app/gql/types/lnseed.dart';
 import 'package:mobile_app/widgets/setup_wallet/create.dart';
 import 'package:mobile_app/widgets/setup_wallet/gen_seed.dart';
@@ -49,7 +47,6 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
   // if true, we have completed all steps and the
   // wallet is synchronizing
   bool _finished = false;
-  LnInfoType _initialInfoType;
 
   void _seedVerifyWordsMatch(bool match) {
     _wordsMatch = match;
@@ -276,9 +273,7 @@ class _SetupWalletPageState extends State<SetupWalletPage> {
       String typename = data.data["lnInitWallet"]["__typename"];
       switch (typename) {
         case "InitWalletSuccess":
-          LnInfoType info = LnInfoType(data.data["lnInitWallet"]["info"]);
           setState(() {
-            _initialInfoType = info;
             _stepsFinished[3] = true;
             _loading = false;
             _finished = true;

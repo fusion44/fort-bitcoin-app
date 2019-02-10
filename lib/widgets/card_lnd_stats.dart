@@ -13,7 +13,6 @@ class CardLndStats extends StatelessWidget {
   final bool _testnet;
   final String _alias;
   final int _blockHeight;
-  final String _identityPubkey;
   final int _numActiveChannels;
   final int _numInactiveChannels;
   final int _numPendingChannels;
@@ -26,7 +25,6 @@ class CardLndStats extends StatelessWidget {
       this._testnet = true,
       this._alias = "",
       this._blockHeight = -1,
-      this._identityPubkey = "",
       this._numActiveChannels = -1,
       this._numInactiveChannels = -1,
       this._numPendingChannels = -1,
@@ -36,7 +34,6 @@ class CardLndStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
     String header = "Lightning Mainnet";
     if (_testnet) {
       header = "Lightning Testnet";

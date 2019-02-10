@@ -5,7 +5,6 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 import 'package:flutter/material.dart';
-import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/pages/channels.dart';
 import 'package:mobile_app/pages/node_info.dart';
 import 'package:mobile_app/pages/peers.dart';
@@ -55,7 +54,7 @@ class _ConnectivityPageState extends State<ConnectivityPage> {
     Widget body;
     switch (_page) {
       case BottomNavbarPagesConn.channels:
-        body = ChannelsPage(ConfigurationBloc().config.testnet);
+        body = ChannelsPage();
         break;
       case BottomNavbarPagesConn.peers:
         body = PeersPage();

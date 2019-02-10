@@ -24,14 +24,6 @@ class ReceivePage extends StatefulWidget {
   _ReceivePageState createState() => _ReceivePageState();
 }
 
-enum _PageStates {
-  initial,
-  awaiting_new_invoice,
-  awaiting_settlement,
-  settled,
-  show_error
-}
-
 class _ReceivePageState extends State<ReceivePage> {
   bool _onChain = false;
 

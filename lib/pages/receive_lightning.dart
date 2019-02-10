@@ -55,7 +55,6 @@ class _ReceiveLightningPageState extends State<ReceiveLightningPage> {
   @override
   void dispose() {
     if (_subscription != null) _subscription.cancel();
-    // TODO: implement dispose
     super.dispose();
   }
 

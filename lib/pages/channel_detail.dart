@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/blocs/channels_bloc.dart';
 import 'package:mobile_app/blocs/peers_bloc.dart';
-import 'package:mobile_app/blocs/close_channel/close_channel_bloc.dart';
 import 'package:mobile_app/gql/types/lnchannel.dart';
 import 'package:mobile_app/gql/types/lnpeer.dart';
 import 'package:mobile_app/pages/close_channel.dart';

@@ -158,7 +158,6 @@ class _StatsPageState extends State<StatsPage> {
                       _data["lnGetInfo"]["lnInfo"]["testnet"],
                       _data["lnGetInfo"]["lnInfo"]["alias"],
                       _data["lnGetInfo"]["lnInfo"]["blockHeight"],
-                      _data["lnGetInfo"]["lnInfo"]["identityPubkey"],
                       _data["lnGetInfo"]["lnInfo"]["numActiveChannels"],
                       _data["lnGetInfo"]["lnInfo"]["numInactiveChannels"],
                       _data["lnGetInfo"]["lnInfo"]["numPendingChannels"],

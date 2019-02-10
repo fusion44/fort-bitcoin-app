@@ -12,7 +12,6 @@ import 'package:mobile_app/gql/mutations/peers.dart' as peerQueries;
 import 'package:mobile_app/gql/types/lnpeer.dart';
 import 'package:mobile_app/widgets/connect_peer_confirm.dart';
 import 'package:mobile_app/widgets/peer_display.dart';
-import 'package:mobile_app/widgets/scale_in_animated_icon.dart';
 import 'package:qrcode_reader/qrcode_reader.dart';
 import 'package:unicorndial/unicorndial.dart';
 
@@ -32,7 +31,6 @@ enum _PageStates {
 }
 
 class _PeersPageState extends State<PeersPage> {
-  bool _loading = true;
   _PageStates _currentState = _PageStates.initial;
   Widget _currentPage;
   GraphQLClient _client;
@@ -318,39 +316,5 @@ class _PeersPageState extends State<PeersPage> {
         },
       );
     });
-  }
-
-  Future<Null> _showConnectSuccessDialog() async {
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) async {
-        await showDialog<Null>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Connected!'),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: <Widget>[
-                    ScaleInAnimatedIcon(
-                      Icons.check_circle_outline,
-                      size: 150.0,
-                    )
-                  ],
-                ),
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
   }
 }
