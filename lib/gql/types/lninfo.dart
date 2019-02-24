@@ -4,6 +4,8 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+import 'package:date_format/date_format.dart';
+
 class LnInfoType {
   // The identity pubkey of the current node.
   String identityPubkey;
@@ -52,5 +54,14 @@ class LnInfoType {
     version = data["version"];
     currentIp = data["currentIp"];
     currentPort = data["currentPort"];
+  }
+
+  String formattedBestHeaderTimestamp({
+    List<String> format = const [yy, "-", M, "-", dd, " ", hh, ":", nn],
+  }) {
+    return formatDate(
+      DateTime.fromMillisecondsSinceEpoch(bestHeaderTimestamp * 1000),
+      format,
+    );
   }
 }
