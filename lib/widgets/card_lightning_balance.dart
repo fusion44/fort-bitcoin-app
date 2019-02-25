@@ -234,15 +234,19 @@ class CardLightningBalanceState extends State<CardLightningBalance> {
             GraphQLClient qlClient = GraphQLProvider.of(context).value;
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) {
-                return BlocProvider<ListPaymentsBloc>(
-                  bloc: ListPaymentsBloc(qlClient),
-                  child: BlocProvider<ListInvoicesBloc>(
-                    bloc: ListInvoicesBloc(qlClient),
+              MaterialPageRoute(
+                builder: (context) {
+                  return BlocProviderTree(
+                    blocProviders: [
+                      BlocProvider<ListPaymentsBloc>(
+                          bloc: ListPaymentsBloc(qlClient)),
+                      BlocProvider<ListInvoicesBloc>(
+                          bloc: ListInvoicesBloc(qlClient)),
+                    ],
                     child: LightningTransfersPage(),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
             );
           },
         ),

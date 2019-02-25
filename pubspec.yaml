@@ -20,14 +20,14 @@ dependencies:
   qrcode_reader: ^0.4.4
   qr_flutter: ^1.1.6
   html: any
-  shared_preferences: 0.4.3
-  date_format: ^1.0.5
-  share: ^0.5.3
+  shared_preferences: ^0.5.1+1
+  date_format: ^1.0.6
+  share: ^0.6.0+1
   unicorndial: ^1.1.5
-  flutter_bloc: ^0.5.1
+  flutter_bloc: ^0.7.0
   flutter_spinkit: ^3.1.0
   built_collection: ^4.1.0
-  equatable: ^0.1.6
+  equatable: ^0.2.1
   
 dev_dependencies:
   flutter_test:

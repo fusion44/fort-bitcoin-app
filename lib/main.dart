@@ -102,27 +102,15 @@ class FortBitcoinAppState extends State<FortBitcoinApp> {
       client: ValueNotifier(gqlCLient),
       child: MaterialApp(
         builder: (BuildContext context, Widget child) {
-          var channelBloc = ChannelBloc(gqlCLient);
-          var openChannelBloc = OpenChannelBloc(token);
-          var peersBloc = PeerBloc(gqlCLient);
-          var nodeInfoBloc = NodeInfoBloc(gqlCLient);
-          var walletInfoBloc = WalletInfoBloc(gqlCLient);
-
-          return BlocProvider<ChannelBloc>(
-            bloc: channelBloc,
-            child: BlocProvider<OpenChannelBloc>(
-              bloc: openChannelBloc,
-              child: BlocProvider<PeerBloc>(
-                bloc: peersBloc,
-                child: BlocProvider<NodeInfoBloc>(
-                  bloc: nodeInfoBloc,
-                  child: BlocProvider<WalletInfoBloc>(
-                    bloc: walletInfoBloc,
-                    child: child,
-                  ),
-                ),
-              ),
-            ),
+          return BlocProviderTree(
+            blocProviders: [
+              BlocProvider<ChannelBloc>(bloc: ChannelBloc(gqlCLient)),
+              BlocProvider<OpenChannelBloc>(bloc: OpenChannelBloc(token)),
+              BlocProvider<PeerBloc>(bloc: PeerBloc(gqlCLient)),
+              BlocProvider<NodeInfoBloc>(bloc: NodeInfoBloc(gqlCLient)),
+              BlocProvider<WalletInfoBloc>(bloc: WalletInfoBloc(gqlCLient)),
+            ],
+            child: child,
           );
         },
         title: 'Fort Bitcoin',

@@ -119,14 +119,12 @@ class _PeerDisplayState extends State<PeerDisplay> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BlocProvider<PeerBloc>(
-                  bloc: _peerBloc,
-                  child: BlocProvider<OpenChannelBloc>(
-                    bloc: _openChannelBloc,
-                    child: OpenChannelPage(
-                      peer: value.peer,
-                    ),
-                  ),
+            builder: (context) => BlocProviderTree(
+                  blocProviders: [
+                    BlocProvider<PeerBloc>(bloc: _peerBloc),
+                    BlocProvider<OpenChannelBloc>(bloc: _openChannelBloc),
+                  ],
+                  child: OpenChannelPage(peer: value.peer),
                 ),
           ),
         );
