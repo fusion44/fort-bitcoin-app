@@ -13,6 +13,7 @@ import 'package:mobile_app/blocs/config_bloc.dart';
 import 'package:mobile_app/blocs/node_info_bloc.dart';
 import 'package:mobile_app/blocs/open_channel/open_channel_bloc.dart';
 import 'package:mobile_app/blocs/peers_bloc.dart';
+import 'package:mobile_app/blocs/wallet_info/wallet_info.dart';
 import 'package:mobile_app/config.dart';
 import 'package:mobile_app/models.dart';
 import 'package:mobile_app/pages/home.dart';
@@ -105,6 +106,7 @@ class FortBitcoinAppState extends State<FortBitcoinApp> {
           var openChannelBloc = OpenChannelBloc(token);
           var peersBloc = PeerBloc(gqlCLient);
           var nodeInfoBloc = NodeInfoBloc(gqlCLient);
+          var walletInfoBloc = WalletInfoBloc(gqlCLient);
 
           return BlocProvider<ChannelBloc>(
             bloc: channelBloc,
@@ -113,7 +115,12 @@ class FortBitcoinAppState extends State<FortBitcoinApp> {
               child: BlocProvider<PeerBloc>(
                 bloc: peersBloc,
                 child: BlocProvider<NodeInfoBloc>(
-                    bloc: nodeInfoBloc, child: child),
+                  bloc: nodeInfoBloc,
+                  child: BlocProvider<WalletInfoBloc>(
+                    bloc: walletInfoBloc,
+                    child: child,
+                  ),
+                ),
               ),
             ),
           );

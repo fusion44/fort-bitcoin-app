@@ -71,6 +71,15 @@ class _WalletSetupSuccessWidgetState extends State<WalletSetupSuccessWidget> {
               children.add(Padding(
                   padding: EdgeInsets.only(top: 20.0),
                   child: Text(date, style: theme.textTheme.display1)));
+              children.add(
+                RaisedButton(
+                  child: Text("Home"),
+                  onPressed: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/home", (_) => false);
+                  },
+                ),
+              );
               break;
             case "GetInfoError":
               String msg = data["errorMessage"] ?? "No error description";
