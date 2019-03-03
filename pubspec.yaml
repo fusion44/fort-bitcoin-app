@@ -18,7 +18,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   graphql_flutter: 1.0.0-alpha.11
   qrcode_reader: ^0.4.4
-  qr_flutter: ^1.1.6
+  qr_flutter: ^2.0.0+51
   html: any
   shared_preferences: ^0.5.1+1
   date_format: ^1.0.6
@@ -27,7 +27,7 @@ dependencies:
   flutter_bloc: ^0.7.0
   flutter_spinkit: ^3.1.0
   built_collection: ^4.1.0
-  equatable: ^0.2.1
+  equatable: ^0.2.2
   
 dev_dependencies:
   flutter_test:
