@@ -17,8 +17,8 @@ class BalanceDisplayLightning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String unit = _testnet ? "tStatoshis" : "Satoshis";
-    String bal = _balance.balance.toString() ?? "0";
-    String pbal = _balance.pendingOpenBalance.toString() ?? "0";
+    String bal = _balance?.balance.toString() ?? "0";
+    String pbal = _balance?.pendingOpenBalance.toString() ?? "0";
 
     return Wrap(
       spacing: 15.0,

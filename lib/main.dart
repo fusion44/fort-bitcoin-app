@@ -8,9 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_app/blocs/auth/auth/authentication.dart';
+import 'package:mobile_app/blocs/channel_balance/channel_balance.dart';
 import 'package:mobile_app/blocs/channels_bloc.dart';
 import 'package:mobile_app/blocs/config_bloc.dart';
+import 'package:mobile_app/blocs/list_invoices/list_invoices_bloc.dart';
+import 'package:mobile_app/blocs/list_payments/list_payments_bloc.dart';
 import 'package:mobile_app/blocs/node_info_bloc.dart';
+import 'package:mobile_app/blocs/onchain_data/onchain_data.dart';
 import 'package:mobile_app/blocs/open_channel/open_channel_bloc.dart';
 import 'package:mobile_app/blocs/peers_bloc.dart';
 import 'package:mobile_app/blocs/wallet_info/wallet_info.dart';
@@ -109,6 +113,11 @@ class FortBitcoinAppState extends State<FortBitcoinApp> {
               BlocProvider<PeerBloc>(bloc: PeerBloc(gqlCLient)),
               BlocProvider<NodeInfoBloc>(bloc: NodeInfoBloc(gqlCLient)),
               BlocProvider<WalletInfoBloc>(bloc: WalletInfoBloc(gqlCLient)),
+              BlocProvider<OnchainDataBloc>(bloc: OnchainDataBloc(gqlCLient)),
+              BlocProvider<ListPaymentsBloc>(bloc: ListPaymentsBloc(gqlCLient)),
+              BlocProvider<ListInvoicesBloc>(bloc: ListInvoicesBloc(gqlCLient)),
+              BlocProvider<ChannelBalanceBloc>(
+                  bloc: ChannelBalanceBloc(gqlCLient)),
             ],
             child: child,
           );

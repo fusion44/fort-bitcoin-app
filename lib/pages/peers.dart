@@ -4,6 +4,8 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -43,6 +45,13 @@ class _PeersPageState extends State<PeersPage> {
   final _formKey = GlobalKey<FormState>();
   final _combinedController = TextEditingController();
   bool _permanent = false;
+  Completer<void> _refreshCompleter;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshCompleter = Completer<void>();
+  }
 
   @override
   void didChangeDependencies() {
@@ -185,10 +194,16 @@ class _PeersPageState extends State<PeersPage> {
       peerCards.add(PeerDisplay(p, _disconnectPeer));
     }
 
+    if (peerState.type == PeerEventType.finishLoading) {
+      _refreshCompleter?.complete();
+      _refreshCompleter = Completer();
+    }
+
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
           _peerBloc.dispatch(LoadPeers(true));
+          return _refreshCompleter.future;
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
