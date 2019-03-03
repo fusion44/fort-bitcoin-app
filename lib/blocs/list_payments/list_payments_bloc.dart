@@ -51,7 +51,7 @@ class ListPaymentsBloc extends Bloc<ListPaymentsEvent, ListPaymentsState> {
             payments, (payments.length > 0 ? false : true), state);
       case "ListPaymentsError":
       case "ServerError":
-        var errorMessage = result.data["lnListListPayments"]["errorMessage"];
+        var errorMessage = result.data["lnListPayments"]["errorMessage"];
         return ListPaymentsState.failure(
             ListPaymentsEventType.failLoading, state, errorMessage);
         break;

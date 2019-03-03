@@ -50,7 +50,7 @@ class ListInvoicesBloc extends Bloc<ListInvoiceEvent, ListInvoicesState> {
             invoices, (invoices.length > 0 ? false : true), state);
       case "ListInvoicesError":
       case "ServerError":
-        var errorMessage = result.data["lnListListInvoices"]["errorMessage"];
+        var errorMessage = result.data["lnListInvoices"]["errorMessage"];
         return ListInvoicesState.failure(
             ListInvoiceEventType.failLoading, state, errorMessage);
         break;
