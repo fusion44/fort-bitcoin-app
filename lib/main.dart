@@ -7,23 +7,22 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:mobile_app/blocs/auth/auth/authentication.dart';
-import 'package:mobile_app/blocs/channel_balance/channel_balance.dart';
-import 'package:mobile_app/blocs/channels_bloc.dart';
-import 'package:mobile_app/blocs/config_bloc.dart';
-import 'package:mobile_app/blocs/list_invoices/list_invoices_bloc.dart';
-import 'package:mobile_app/blocs/list_payments/list_payments_bloc.dart';
-import 'package:mobile_app/blocs/node_info_bloc.dart';
-import 'package:mobile_app/blocs/onchain_data/onchain_data.dart';
-import 'package:mobile_app/blocs/open_channel/open_channel_bloc.dart';
-import 'package:mobile_app/blocs/peers_bloc.dart';
-import 'package:mobile_app/blocs/wallet_info/wallet_info.dart';
+import 'package:mobile_app/auth/auth/authentication.dart';
+import 'package:mobile_app/auth/authentication_page.dart';
+import 'package:mobile_app/auth/wallet/setup_wallet_page.dart';
+import 'package:mobile_app/balance/channel_balance/channel_balance.dart';
+import 'package:mobile_app/balance/invoice/invoice.dart';
+import 'package:mobile_app/balance/onchain_data/onchain_data.dart';
+import 'package:mobile_app/balance/payment/payment.dart';
+import 'package:mobile_app/common/blocs/config_bloc.dart';
+import 'package:mobile_app/common/pages/home_page.dart';
+import 'package:mobile_app/common/pages/splash_page.dart';
 import 'package:mobile_app/config.dart';
+import 'package:mobile_app/connectivity/channels/channels_bloc.dart';
+import 'package:mobile_app/connectivity/channels/open/open_channel.dart';
+import 'package:mobile_app/connectivity/info/wallet_info.dart';
+import 'package:mobile_app/connectivity/peer/peer.dart';
 import 'package:mobile_app/models.dart';
-import 'package:mobile_app/pages/home.dart';
-import 'package:mobile_app/pages/setup_wallet.dart';
-import 'package:mobile_app/pages/signup.dart';
-import 'package:mobile_app/pages/splash.dart';
 import 'package:mobile_app/routes.dart';
 
 void main() async {
@@ -63,7 +62,7 @@ class FortBitcoinAppState extends State<FortBitcoinApp> {
 
             if (state is AuthenticationUnauthenticated) {
               return _buildMaterialApp(
-                SignupPage(),
+                AuthenticationPage(),
               );
             }
 
@@ -111,11 +110,10 @@ class FortBitcoinAppState extends State<FortBitcoinApp> {
               BlocProvider<ChannelBloc>(bloc: ChannelBloc(gqlCLient)),
               BlocProvider<OpenChannelBloc>(bloc: OpenChannelBloc(token)),
               BlocProvider<PeerBloc>(bloc: PeerBloc(gqlCLient)),
-              BlocProvider<NodeInfoBloc>(bloc: NodeInfoBloc(gqlCLient)),
               BlocProvider<WalletInfoBloc>(bloc: WalletInfoBloc(gqlCLient)),
               BlocProvider<OnchainDataBloc>(bloc: OnchainDataBloc(gqlCLient)),
-              BlocProvider<ListPaymentsBloc>(bloc: ListPaymentsBloc(gqlCLient)),
-              BlocProvider<ListInvoicesBloc>(bloc: ListInvoicesBloc(gqlCLient)),
+              BlocProvider<ListPaymentBloc>(bloc: ListPaymentBloc(gqlCLient)),
+              BlocProvider<ListInvoiceBloc>(bloc: ListInvoiceBloc(gqlCLient)),
               BlocProvider<ChannelBalanceBloc>(
                   bloc: ChannelBalanceBloc(gqlCLient)),
             ],
